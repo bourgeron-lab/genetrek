@@ -27,7 +27,7 @@ jobs:
             type=raw,value=latest
       # Without the companion files under resources/static/, which the public
       # instance adds when it deploys.
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64
