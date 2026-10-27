@@ -34,6 +34,13 @@
       "identifier": "https://genetrek.pasteur.fr",
       "relation": "isSupplementTo",
       "scheme": "url"
+    },
+    {
+      "identifier": "10.5281/zenodo.23692280",
+      "relation": "isSupplementedBy",
+      "scheme": "doi",
+      "resource_type": "dataset"
     }
-  ]
+  ],
+  "version": "2.0.0"
 }
