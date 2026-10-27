@@ -11,10 +11,13 @@ older version is still in the table it is named below and appears in the
 comparison table at the foot of this page; where it was retired, the entry says
 so, and the only remaining copy is the published release it shipped in.
 
-<!-- TODO at release: set the date below to the publication date, and add the
-     Zenodo DOI (concept and version) and the link to the matching git tag. -->
-
 ### 2026-10-27 — GeneTrek 2, with HC-NDD v7
+
+**Archived.** The code is release
+[v2.0.0](https://github.com/bourgeron-lab/genetrek/releases/tag/v2.0.0) of
+<https://github.com/bourgeron-lab/genetrek>. The database is deposited on Zenodo,
+with every column's licence, as
+[doi:10.5281/zenodo.23692280](https://doi.org/10.5281/zenodo.23692280).
 
 The first public release of GeneTrek 2. It brings the features of the entries
 below — gene-set comparison, your own lists, an [API](/api-reference) and

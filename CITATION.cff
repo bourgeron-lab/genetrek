@@ -65,3 +65,11 @@ references:
     journal: Biological Psychiatry
     year: 2026
     doi: 10.1016/j.biopsych.2026.10.003
+  - type: data
+    title: GeneTrek database, HC-NDD v7 (GeneTrek 2.0.0)
+    authors:
+      - name: Human Genetics and Cognitive Functions, Institut Pasteur
+    publisher:
+      name: Zenodo
+    year: 2026
+    doi: 10.5281/zenodo.23692280
