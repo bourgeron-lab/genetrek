@@ -1,0 +1,17 @@
+# Token color configuration for the search token editor
+# Colors are used to visually differentiate between different types of gene identifiers
+
+# Gene symbols (e.g., BRCA1, TP53)
+symbol: "#38ada9"
+
+# HGNC/Ensembl IDs (e.g., ENSG00000012048)
+ensembl: "#6c5ce7"
+
+# NCBI Gene IDs (e.g., 672)
+ncbi: "#e17055"
+
+# HGNC IDs (e.g., HGNC:14294)
+hgnc: "#b3609b"
+
+# Genomic loci (e.g., chr17:43000000-44000000)
+loci: "#00b894"

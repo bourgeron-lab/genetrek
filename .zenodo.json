@@ -1,0 +1,39 @@
+{
+  "upload_type": "software",
+  "title": "GeneTrek",
+  "description": "GeneTrek brings together curated gene lists for neurodevelopmental disorders and per-gene annotations (constraint, expression, rare-variant results) in one versioned table, to search, compare against an explicit background, and download. Web application: https://genetrek.pasteur.fr. The code is under the MIT licence; the data keep each source's terms, listed per column in DATA_LICENCES.md.",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Human Genetics and Cognitive Functions, Institut Pasteur",
+      "affiliation": "Institut Pasteur, Paris, France"
+    }
+  ],
+  "keywords": [
+    "neurodevelopmental disorders",
+    "autism",
+    "epilepsy",
+    "intellectual disability",
+    "gene lists",
+    "genomics"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.1016/j.mcn.2021.103623",
+      "relation": "isDescribedBy",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.1016/j.biopsych.2026.10.003",
+      "relation": "isReferencedBy",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://genetrek.pasteur.fr",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}

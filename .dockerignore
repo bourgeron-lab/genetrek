@@ -1,0 +1,45 @@
+# Keep the build context to what the image needs: pyproject.toml, uv.lock,
+# README.md, .gitignore, src/ and the runtime slice of resources/.
+
+# Version control, editors, OS cruft. .gitignore is deliberately NOT excluded --
+# hatchling reads it when selecting wheel contents.
+.git
+.gitattributes
+.claude
+.vscode
+.idea
+.DS_Store
+**/.DS_Store
+**/._*
+
+# Local virtualenv and tool caches. .venv alone is ~570 MB, and it is a
+# macOS/arm64 venv that would be useless inside a linux/amd64 image anyway.
+.venv
+**/__pycache__
+**/*.py[cod]
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+build
+dist
+*.egg-info
+
+# Not needed to run the application.
+tests
+notebooks
+docs
+chart
+CLAUDE.md
+Dockerfile
+.dockerignore
+.gitlab-ci.yml
+
+# resources/: keep only what the webapp reads.
+# Upstream source files, read only by `genetrek-db`.
+resources/original_file
+# CLI-generated, and already gitignored.
+resources/processed_data/.backups
+resources/processed_data/staging
+resources/processed_data/history.jsonl

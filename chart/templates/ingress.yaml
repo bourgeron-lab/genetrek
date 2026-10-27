@@ -1,0 +1,35 @@
+{{- if .Values.ingress.enabled }}
+{{/*
+Deliberately no annotations: they are controller-specific, and a plain Ingress
+with a host and a path is all the application needs. Websockets need nothing
+either; socket.io falls back to long polling if an upgrade ever fails, which is
+safe at one replica.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "genetrek.fullname" . }}
+  labels: {{- include "genetrek.labels" . | nindent 4 }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tlsSecretName }}
+  tls:
+    # Must already exist in the namespace; nothing here creates it.
+    - hosts:
+        - {{ $.Values.ingress.host | quote }}
+      secretName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "genetrek.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}

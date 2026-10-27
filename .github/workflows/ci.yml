@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          # At least the version that wrote uv.lock, or --frozen refuses it.
+          version: "0.10.9"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen --group dev
+      - run: uv run ruff check src/ tests/
+      - run: uv run ruff format --check src/ tests/
+      - run: uv run mypy src/genetrek/
+      # test_real_database.py checks the committed parquet against its metadata,
+      # and DATA_LICENCES.md against every column's licence.
+      - run: uv run pytest
+
+  chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint ./chart --set image.repository=example --set image.tag=test
+      - run: helm template genetrek ./chart --set image.repository=example --set image.tag=test
+      # An all-digit short sha arrives from --set as an int64; the image name must
+      # still render as repository:digits (it once rendered %!s(int64=...)).
+      - run: >
+          helm template genetrek ./chart --set image.repository=example --set image.tag=45801511
+          | grep -q 'image: "example:45801511"'
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The image must build from this repository alone, without the companion
+      # files a deployment adds under resources/static/.
+      - run: docker build --platform linux/amd64 -t genetrek:ci .

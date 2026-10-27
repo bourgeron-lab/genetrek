@@ -1,0 +1,7 @@
+apiVersion: v2
+name: genetrek
+description: GeneTrek, a browser for genes associated with neurodevelopmental disorders
+type: application
+# The chart's own version. appVersion is deliberately absent: the running
+# version is the image tag, which CI sets per deploy from the commit.
+version: 0.1.0

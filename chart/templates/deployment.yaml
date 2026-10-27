@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "genetrek.fullname" . }}
+  labels: {{- include "genetrek.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      # The new pod must be Ready before the old one goes away.
+      maxUnavailable: 0
+  selector:
+    matchLabels: {{- include "genetrek.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{/*
+      No timestamp annotation to force a rollout. The image tag is the commit
+      sha, so the pod template already differs on every deploy and Kubernetes
+      rolls on its own; the trick is only needed for a mutable tag.
+      */}}
+      labels: {{- include "genetrek.selectorLabels" . | nindent 8 }}
+    spec:
+      # The application never calls the API server, so not projecting a token
+      # removes the most useful thing an attacker could find in the pod.
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: genetrek
+          {{- /*
+            toString, not the bare value: a short sha can be all digits
+            (45801511), which `--set` hands over as an int64, and printf's %s
+            then renders `%!s(int64=45801511)` -- an image name the cluster
+            refuses. CI also passes it with --set-string; this holds either way.
+          */}}
+          image: {{ printf "%s:%s" (required "image.repository is required" .Values.image.repository) (toString (required "image.tag is required" .Values.image.tag)) | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $name, $value := .Values.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+            # Surfaced by /api/health, so confirming which build is live is one
+            # request rather than a kubectl describe.
+            - name: GENETREK_RELEASE
+              value: {{ .Values.image.tag | toString | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: http
+            {{- toYaml .Values.probes.startup | nindent 12 }}
+          {{/*
+          No initialDelaySeconds on either probe below: startupProbe already
+          gates them, and adding a delay would only be dead time on a restart.
+          Readiness is slack because at one replica a failed probe empties the
+          Service and every user gets a 503.
+          */}}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: http
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: http
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            # Safe because uv compiled every .pyc at build time and
+            # PYTHONDONTWRITEBYTECODE stops new ones; the application itself
+            # only ever writes to in-memory buffers. If the pod ever misbehaves
+            # inexplicably, this is the first line to drop -- the failure mode
+            # is a loud EROFS traceback in the logs.
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        # HOME is /tmp in the image, and a read-only root filesystem needs
+        # somewhere writable for anything that spools to disk.
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

@@ -1,0 +1,48 @@
+# Build spec for `genetrek-db init`, which creates a database from scratch out
+# of the HGNC complete set plus GENCODE coordinates.
+#
+# `columns` selects the HGNC columns to keep and their visibility in the
+# webapp; anything not listed here is discarded. CLI flags
+# (--primary/--secondary/--hidden/--drop) override this file per column.
+#
+# Column names in the built database mark who *authors* the value, not which
+# file it arrived in: HGNC is the authority for symbols and nomenclature and
+# merely cross-references entrez_id, ensembl_gene_id, refseq_accession,
+# omim_id and mane_select, so those keep source-accurate names.
+
+# "latest", or a YYYY-MM-DD present in the HGNC archive.
+release: latest
+
+# Assemblies to place genes in, reference first. The reference breaks ties when
+# one gene is annotated at several loci.
+assemblies:
+  - GRCh38
+  - GRCh37
+
+# A specific GENCODE release number, or null for the newest that carries every
+# assembly above. Recorded in the field metadata either way.
+gencode_release: null
+
+# Fall back to NCBI for genes GENCODE cannot place (no Ensembl ID, or an ID
+# absent from one assembly's annotation). Set false to build offline-ish and
+# leave those coordinates null.
+use_ncbi_fallback: true
+
+# HGNC column -> visibility (primary | secondary | hidden).
+columns:
+  symbol: primary
+  hgnc_id: secondary
+  name: secondary
+  locus_group: secondary
+  locus_type: secondary
+  location: secondary
+  alias_symbol: secondary
+  prev_symbol: secondary
+  entrez_id: secondary
+  ensembl_gene_id: secondary
+  refseq_accession: secondary
+  omim_id: secondary
+  mane_select: secondary
+
+# Visibility for the derived coordinate columns (grch38_*, grch37_*, strand).
+coordinates: secondary

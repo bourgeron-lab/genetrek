@@ -1,0 +1,67 @@
+cff-version: 1.2.0
+message: >-
+  If you use GeneTrek, please cite it as below. If you use the high-confidence
+  NDD gene list (hc_ndd_v7) or its autism, IDD or epilepsy lists, please also
+  cite Korkmaz et al. 2026; and cite the source of every column you rely on
+  (see DATA_LICENCES.md and https://genetrek.pasteur.fr/cite).
+type: software
+title: GeneTrek
+version: 2.0.0
+license: MIT
+url: https://genetrek.pasteur.fr
+repository-code: https://github.com/bourgeron-lab/genetrek
+abstract: >-
+  GeneTrek brings together curated gene lists for neurodevelopmental disorders
+  and per-gene annotations (constraint, expression, rare-variant results) in one
+  versioned table, to search, compare against an explicit background, and
+  download.
+keywords:
+  - neurodevelopmental disorders
+  - autism
+  - epilepsy
+  - intellectual disability
+  - gene lists
+  - genomics
+authors:
+  # Placeholder until the creators' names, affiliations and ORCIDs are set.
+  - name: Human Genetics and Cognitive Functions, Institut Pasteur
+    email: ghfcgenetics@pasteur.fr
+preferred-citation:
+  type: article
+  title: >-
+    Operative list of genes associated with autism and neurodevelopmental
+    disorders based on database review
+  authors:
+    - family-names: Leblond
+      given-names: Claire S.
+    - family-names: Le
+      given-names: T. L.
+    - family-names: Malesys
+      given-names: S.
+    - family-names: Cliquet
+      given-names: Freddy
+    - family-names: Tabet
+      given-names: A. C.
+    - family-names: Delorme
+      given-names: Richard
+    - family-names: Rolland
+      given-names: Thomas
+    - family-names: Bourgeron
+      given-names: Thomas
+  journal: Molecular and Cellular Neurosciences
+  volume: 113
+  start: 103623
+  year: 2021
+  doi: 10.1016/j.mcn.2021.103623
+references:
+  - type: article
+    title: >-
+      The genetic orchestra of autism and its intersections with epilepsy,
+      intellectual disability, and ADHD
+    authors:
+      - family-names: Korkmaz
+        given-names: Sélin
+      - name: et al.
+    journal: Biological Psychiatry
+    year: 2026
+    doi: 10.1016/j.biopsych.2026.10.003

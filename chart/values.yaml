@@ -1,0 +1,84 @@
+# Generic defaults. A deployment supplies its own values file for the image,
+# the ingress and anything specific to its cluster (namespace is a helm flag,
+# not a value).
+
+# Names every resource; empty means the chart name, "genetrek".
+nameOverride: ""
+
+image:
+  # Both set at deploy time: the registry path, and the commit sha or tag.
+  repository: ""
+  tag: ""
+  # IfNotPresent, not Always: the tag is an immutable commit sha, so there is
+  # never anything newer to fetch, and a registry outage cannot turn a pod
+  # restart into ImagePullBackOff on a node that already has the layers.
+  pullPolicy: IfNotPresent
+
+# Needed only for a private registry, e.g. [{name: my-registry-secret}].
+imagePullSecrets: []
+
+# Load-bearing, not a placeholder. Each browser session's UI state (selected
+# columns, current page, filtered frame) lives in a Python closure inside
+# @ui.page("/"), so a second replica would answer a socket.io reconnect from a
+# process that has never seen that client. Scaling out needs NICEGUI_REDIS_URL
+# and session affinity, neither of which is tested here.
+replicaCount: 1
+
+service:
+  port: 8000
+
+ingress:
+  enabled: false
+  # The cluster's ingress class; empty uses the cluster default.
+  className: ""
+  host: ""
+  # An existing TLS secret in the namespace; empty serves no tls block.
+  tlsSecretName: ""
+
+resources:
+  requests:
+    # Measured steady state is ~211 MB resident: the frame itself is only
+    # ~14 MB, the rest is the interpreter plus polars, scipy, numpy and nicegui.
+    memory: 384Mi
+    cpu: 200m
+  limits:
+    # Sized for the download path, not for steady state. Serialising the whole
+    # database to JSON peaks around 570 MB, so a 512Mi limit would OOMKill on
+    # the first such request.
+    memory: 1536Mi
+    # One uvicorn worker cannot use more than one core.
+    cpu: "1"
+
+env:
+  # Also the image default. Repeated here because it is the value you would
+  # change to serve data from a mounted volume, and it should be visible to
+  # someone reading only the manifest.
+  GENETREK_RESOURCES: /app/resources
+  # polars sizes its thread pool from the host's cpu count rather than the
+  # cgroup limit, so without this it starts dozens of threads to contend over
+  # one core. Read at import, so it has to come from the environment.
+  POLARS_MAX_THREADS: "2"
+  # glibc reserves a 64 MB arena per thread; capping them stops resident memory
+  # ratcheting upward after each download and never coming back.
+  MALLOC_ARENA_MAX: "2"
+
+# Probe timings. Measured cold start is ~0.6s (importing polars, scipy.stats and
+# nicegui, then reading a 3.2 MB parquet), so the startup budget below is ~100x
+# headroom while still failing a genuinely broken pod inside a minute.
+probes:
+  path: /api/health
+  startup:
+    periodSeconds: 3
+    timeoutSeconds: 2
+    failureThreshold: 20
+  readiness:
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  liveness:
+    # Deliberately slack: this is one worker on one event loop, and serialising
+    # a download blocks it for seconds under a one-core limit. A tight probe
+    # would restart the pod in the middle of a user's download.
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3

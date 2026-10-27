@@ -1,0 +1,24 @@
+# Universes for gene-set comparisons (the Compare view and the statistics
+# drawer's enrichment). The first entry is the default. An entry without a
+# `column` is every gene in the database.
+#
+# The choice matters: most gene lists are protein-coding, and testing their
+# overlap against all genes -- a third of which are pseudogenes -- makes any
+# two of them look enriched in each other.
+backgrounds:
+  - name: Protein-coding genes
+    column: hgnc_locus_group
+    equals: protein-coding gene
+    description: HGNC locus group "protein-coding gene"
+  - name: All genes
+    description: Every gene in the database, coding or not
+
+# Gene properties a comparison can be stratified by (a Cochran-Mantel-Haenszel
+# analysis across quantile bins, computed within the chosen background, plus a
+# stratum for genes with no value). NDD lists are dominated by constrained
+# genes, so without this almost any brain-related list looks enriched in them.
+covariates:
+  - name: LOEUF decile
+    column: loeuf
+    bins: 10
+    description: gnomAD loss-of-function observed/expected upper bound fraction

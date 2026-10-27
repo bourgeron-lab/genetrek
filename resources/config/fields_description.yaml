@@ -1,0 +1,1827 @@
+hgnc_id:
+  fullname: HGNC ID
+  description: "HGNC identifier, in its canonical prefixed form (HGNC:5)"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: hgnc
+  assembly: ""
+  primary_key: true
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_symbol:
+  fullname: Gene
+  description: "HGNC-approved gene symbol"
+  update: "20260918"
+  visibility: primary
+  priority: 10
+  category: "Gene identity"
+  subcategory: ""
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: symbol
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_name:
+  fullname: Gene name
+  description: "HGNC-approved gene name"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_locus_group:
+  fullname: Locus group
+  description: "Broad locus classification (protein-coding gene, pseudogene, non-coding RNA, other)"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_locus_type:
+  fullname: Locus type
+  description: "Specific locus type within the locus group"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_location:
+  fullname: Cytogenetic location
+  description: "Cytogenetic band, as curated by HGNC (not derived from the coordinates in this database)"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_alias_symbol:
+  fullname: Alias symbols
+  description: "Alternative symbols in use for this gene, pipe-separated"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hgnc_prev_symbol:
+  fullname: Previous symbols
+  description: "Symbols this gene was previously approved under, pipe-separated"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Nomenclature"
+  source: "HGNC"
+  doi: ""
+  licence: CC0-1.0
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+ncbi_id:
+  fullname: NCBI ID
+  description: "NCBI gene identifier (formerly Entrez Gene ID), cross-referenced by HGNC"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Cross-references"
+  source: "NCBI Gene, via the HGNC complete set"
+  doi: ""
+  licence: CC0-1.0 (via HGNC)
+  universe: ""
+  value_type: string
+  id_type: ncbi
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+ensg:
+  fullname: Ensembl ID
+  description: "Ensembl gene identifier for the GRCh38 assembly, cross-referenced by HGNC"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Cross-references"
+  source: "Ensembl, via the HGNC complete set"
+  doi: ""
+  licence: CC0-1.0 (via HGNC)
+  universe: ""
+  value_type: string
+  id_type: ensg
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+refseq_accession:
+  fullname: RefSeq accession
+  description: "RefSeq nucleotide accession, cross-referenced by HGNC"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Cross-references"
+  source: "NCBI RefSeq, via the HGNC complete set"
+  doi: ""
+  licence: CC0-1.0 (via HGNC)
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+omim_id:
+  fullname: OMIM ID
+  description: "OMIM gene identifier, cross-referenced by HGNC"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Cross-references"
+  source: "OMIM, via the HGNC complete set"
+  doi: ""
+  licence: CC0-1.0 (via HGNC)
+  universe: ""
+  value_type: string
+  id_type: omim
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+mane_select:
+  fullname: MANE Select
+  description: "MANE Select transcript: the one RefSeq/Ensembl transcript pair agreed to represent this gene"
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Gene identity"
+  subcategory: "Cross-references"
+  source: "MANE (NCBI and EMBL-EBI), via the HGNC complete set"
+  doi: ""
+  licence: CC0-1.0 (via HGNC)
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "hgnc_complete_set_20260918.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch38_chr:
+  fullname: GRCh38 chromosome
+  description: "Gene chromosome in GRCh38, joined on the Ensembl gene ID."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh38"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: string
+  id_type: locus_chr
+  assembly: GRCh38
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch38_start:
+  fullname: GRCh38 start
+  description: "Gene start in GRCh38, joined on the Ensembl gene ID."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh38"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: integer
+  id_type: locus_start
+  assembly: GRCh38
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch38_end:
+  fullname: GRCh38 end
+  description: "Gene end in GRCh38, joined on the Ensembl gene ID."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh38"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: integer
+  id_type: locus_end
+  assembly: GRCh38
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch38_source:
+  fullname: GRCh38 coordinate source
+  description: "Which source placed this gene in GRCh38: 'gencode', 'ncbi', or null when neither could. The two annotators call gene boundaries differently, so this says which one the coordinates come from."
+  update: "20260918"
+  visibility: hidden
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh38"
+  source: "genetrek-db init"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch37_chr:
+  fullname: GRCh37 chromosome
+  description: "Gene chromosome in GRCh37, joined on the Ensembl gene ID. Taken from GENCODE's lift37 annotation -- the current gene model backmapped onto GRCh37 -- so both assemblies describe the same gene. It is not the historical GRCh37 annotation: where that also has the gene, bounds differ by a median 15 bp and a p95 of 32 kb, because transcript models have been extended since."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh37"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: string
+  id_type: locus_chr
+  assembly: GRCh37
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch37_start:
+  fullname: GRCh37 start
+  description: "Gene start in GRCh37, joined on the Ensembl gene ID. Taken from GENCODE's lift37 annotation -- the current gene model backmapped onto GRCh37 -- so both assemblies describe the same gene. It is not the historical GRCh37 annotation: where that also has the gene, bounds differ by a median 15 bp and a p95 of 32 kb, because transcript models have been extended since."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh37"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: integer
+  id_type: locus_start
+  assembly: GRCh37
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch37_end:
+  fullname: GRCh37 end
+  description: "Gene end in GRCh37, joined on the Ensembl gene ID. Taken from GENCODE's lift37 annotation -- the current gene model backmapped onto GRCh37 -- so both assemblies describe the same gene. It is not the historical GRCh37 annotation: where that also has the gene, bounds differ by a median 15 bp and a p95 of 32 kb, because transcript models have been extended since."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh37"
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: integer
+  id_type: locus_end
+  assembly: GRCh37
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+grch37_source:
+  fullname: GRCh37 coordinate source
+  description: "Which source placed this gene in GRCh37: 'gencode', 'ncbi', or null when neither could. The two annotators call gene boundaries differently, so this says which one the coordinates come from."
+  update: "20260918"
+  visibility: hidden
+  priority: null
+  category: "Coordinates"
+  subcategory: "GRCh37"
+  source: "genetrek-db init"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+strand:
+  fullname: Strand
+  description: "Transcription strand. One column, not one per assembly: a gene does not change strand between assemblies."
+  update: "20260918"
+  visibility: secondary
+  priority: null
+  category: "Coordinates"
+  subcategory: ""
+  source: "GENCODE v50, with NCBI as a fallback"
+  doi: ""
+  licence: No restrictions (Ensembl/GENCODE, NCBI)
+  universe: ""
+  value_type: string
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
+hc_ndd_v7:
+  fullname: High-confidence NDD v7
+  description: "High-confidence neurodevelopmental disorder genes, version 7"
+  update: "20260710"
+  visibility: primary
+  priority: 10
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation: union of autism_genes_v7, idd_genes_v7 and epilepsy_genes_v7"
+  doi: "10.1016/j.biopsych.2026.10.003"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: union
+  derived_from: [autism_genes_v7, idd_genes_v7, epilepsy_genes_v7]
+  aliases: [hc_ndd]
+candidate_ndd_v5:
+  fullname: Candidate NDD v5
+  description: "Candidate neurodevelopmental disorder genes, version 5. Not updated for HC-NDD v7: built against an earlier HC-NDD, so 385 of its genes are also in hc_ndd_v7. An updated candidate list, with no gene in common with HC-NDD, will follow soon."
+  update: ""
+  visibility: secondary
+  priority: 20
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [candidate_ndd]
+hc_ndd_v6:
+  fullname: High-confidence NDD v6
+  description: "High-confidence neurodevelopmental disorder genes, version 6"
+  update: ""
+  visibility: secondary
+  priority: 30
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hc_ndd_v3:
+  fullname: High-confidence NDD v3
+  description: "High-confidence neurodevelopmental disorder genes, version 3"
+  update: ""
+  visibility: secondary
+  priority: 40
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+sysndd_definitive_v0_11_2:
+  fullname: SysNDD definitive
+  description: "SysNDD curated gene-disease relationships for clinical diagnostics, counseling, and research. Definitive genes have a strong and well-established association with NDDs."
+  update: "20260323"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "IDD"
+  source: "SysNDD https://sysndd.dbmr.unibe.ch/ v0.11.2"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [sysndd_definitive]
+spark_20250617:
+  fullname: SPARK
+  description: "SPARK gene list. Genes associated with autism for which relevant genetic findings are reported to the participant."
+  update: "20250617"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "https://sparkforautism.org/portal/page/spark-gene-list/"
+  doi: ""
+  licence: SPARK Terms of Use; public display permitted by the Simons Foundation (SFARI)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [spark]
+sfari_1_20260322:
+  fullname: SFARI 1
+  description: "SFARI category 1 (high confidence). Genes with strong evidence of association with autism."
+  update: "20260322"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "https://gene.sfari.org/database/gene-scoring/ - SFARI Gene, 2026-03-22 release"
+  doi: ""
+  licence: SFARI Gene terms (reuse with citation)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [sfari_1]
+acmg_sf_v3_3:
+  fullname: ACMG SF
+  description: "ACMG SF list for reporting secondary findings in clinical exome/genome sequencing comprising genes associated with clinically actionable conditions."
+  update: "20260819"
+  visibility: secondary
+  priority: null
+  category: "Other gene lists"
+  subcategory: "Clinical"
+  source: "ACMG SF v3.3 list -- Lee K et al., Genet Med 2025;27(8):101454"
+  doi: "10.1016/j.gim.2025.101454"
+  licence: Not open (Genet Med 2025); factual gene list
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [acmg_sf]
+panelapp_aus_autism_20260331:
+  fullname: PanelApp AUS Autism
+  description: "Autism panel in clinical diagnostic genomics - Green genes"
+  update: "20260331"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/51/ v0.248"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_autism]
+panelapp_aus_id_20260331:
+  fullname: PanelApp AUS Intellectual disability
+  description: "Intellectual disability syndromic and nonsyndromic panel in clinical diagnostic genomics - Green genes"
+  update: "20260331"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "IDD"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/250/ v1.731"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_id]
+panelapp_aus_epilepsy_20260331:
+  fullname: PanelApp AUS Genetic epilepsy
+  description: "Genetic Epilepsy panel in clinical diagnostic genomics - Green genes"
+  update: "20260331"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Epilepsy"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/202/ v1.4"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_epilepsy]
+panelapp_aus_myoclonic_epilepsy_20260331:
+  fullname: PanelApp AUS Progressive myoclonic epilepsy
+  description: "Progressive Myoclonic Epilepsy panel in clinical diagnostic genomics - Green genes"
+  update: "20260331"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Epilepsy"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/331/ v0.28"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_myoclonic_epilepsy]
+panelapp_aus_speech_apraxia_20260331:
+  fullname: PanelApp AUS Speech apraxia
+  description: "Speech Apraxia panel in clinical diagnostic genomics - Green genes"
+  update: "20260331"
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Other"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/4290/ v1.28"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_speech_apraxia]
+cancer_ncg_7_2:
+  fullname: Canonical cancer drivers
+  description: "Cancer genes from Network of Cancer Genes, release 7.2 - canonical cancer driver genes"
+  update: "20260915"
+  visibility: secondary
+  priority: null
+  category: "Other gene lists"
+  subcategory: "Cancer"
+  source: "Network of Cancer Genes - http://network-cancer-genes.org/canonical_drivers.php NCG7.2"
+  doi: "10.1186/s13059-022-02607-z"
+  licence: None stated (NCG; cite)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+panelapp_aus_cancer_predisposition:
+  fullname: PanelApp AUS Cancer Predisposition Paediatric
+  description: "Cancer Predisposition Paediatric panel in clinical diagnostic genomics - Green genes"
+  update: "20260915"
+  visibility: secondary
+  priority: null
+  category: "Other gene lists"
+  subcategory: "Cancer"
+  source: "PanelApp Australia - https://panelapp-aus.org/panels/152/ v1.2"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [panelapp_aus_cancer]
+chromatin_remodeling:
+  fullname: Epigenetic regulators and chromatin remodellors
+  description: "Epigenetic regulators and chromatin remodellors from Valencia et al. 2023"
+  update: ""
+  visibility: secondary
+  priority: null
+  category: "Function"
+  subcategory: ""
+  source: "Valencia et al., Nature Genetics 2023"
+  doi: "10.1038/s41588-023-01451-6"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+epifactors_v2_1:
+  fullname: Epifactors
+  description: "Epigenetic factors from EpiFactors database v2.1"
+  update: "20240910"
+  visibility: secondary
+  priority: null
+  category: "Function"
+  subcategory: ""
+  source: "https://epifactors.autosome.org/ - EpiFactors v2.1"
+  doi: "10.1093/database/bav067"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [epifactors]
+rummagene_tf:
+  fullname: Rummagene transcription factor
+  description: "Transcription factors from Rummagene database"
+  update: "20240315"
+  visibility: secondary
+  priority: null
+  category: "Function"
+  subcategory: ""
+  source: "https://rummagene.com/ - Rummagene"
+  doi: "10.1038/s42003-024-06177-7"
+  licence: Unclear (CC-BY-4.0 data, CC-BY-NC-SA-4.0 repository)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+trrust_v2_tf:
+  fullname: TRRUST transcription factor
+  description: "Transcription factors from TRRUST v2 database - human transcriptional regulatory networks"
+  update: "20180416"
+  visibility: secondary
+  priority: null
+  category: "Function"
+  subcategory: ""
+  source: "TRRUST - https://www.grnpedia.org/trrust/ v2"
+  doi: "10.1093/nar/gkx1013"
+  licence: CC-BY-SA-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+syngo_v1_3:
+  fullname: SynGO v1.3
+  description: "Synaptic gene ontologies - Gene ontology annotations from the Synaptic Gene Knowledgebase, v1.3 (2025 release)"
+  update: ""
+  visibility: primary
+  priority: 20
+  category: "Function"
+  subcategory: ""
+  source: "SynGO - https://www.syngoportal.org/ v1.3"
+  doi: "10.1016/j.neuron.2019.05.002"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: [syngo]
+metabolic_process_go_8152:
+  fullname: Metabolic process
+  description: "Metabolic process gene ontologies (GO:0008152) from QuickGO"
+  update: "20250224"
+  visibility: primary
+  priority: 30
+  category: "Function"
+  subcategory: ""
+  source: "https://www.ebi.ac.uk/QuickGO/ GO:0008152"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+shet_mean:
+  fullname: s-het mean
+  description: "Mean of the s-het estimate from MCMC sampling. s-het is a gene-level constraint score: the selection coefficient that quantifies fitness loss due to heterozygous pLoF variation. It is available for 16,710 canonical transcripts."
+  update: ""
+  visibility: secondary
+  priority: 20
+  category: "Constraint"
+  subcategory: "s-het"
+  source: "Sun et al. Nature 2024"
+  doi: "10.1038/s41586-024-07556-0"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+shet_sd:
+  fullname: s-het sd
+  description: "Standard deviation of the s-het estimate from MCMC sampling. s-het is a gene-level constraint score: the selection coefficient that quantifies fitness loss due to heterozygous pLoF variation. It is available for 16,710 canonical transcripts."
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "s-het"
+  source: "Sun et al. Nature 2024"
+  doi: "10.1038/s41586-024-07556-0"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+shet_lower:
+  fullname: s-het (lower bound)
+  description: "2.5% quantile of the s-het highest posterior density from MCMC sampling. s-het is a gene-level constraint score: the selection coefficient that quantifies fitness loss due to heterozygous pLoF variation. It is available for 16,710 canonical transcripts."
+  update: ""
+  visibility: secondary
+  priority: 30
+  category: "Constraint"
+  subcategory: "s-het"
+  source: "Sun et al. Nature 2024"
+  doi: "10.1038/s41586-024-07556-0"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+shet_upper:
+  fullname: s-het (upper bound)
+  description: "97.5% quantile of the s-het highest posterior density from MCMC sampling -- the upper credible bound on s-het. s-het is a gene-level constraint score: the selection coefficient that quantifies fitness loss due to heterozygous pLoF variation. It is available for 16,710 canonical transcripts."
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "s-het"
+  source: "Sun et al. Nature 2024"
+  doi: "10.1038/s41586-024-07556-0"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+is_shet_constrained:
+  fullname: s-het constrained
+  description: "Gene is constrained if s-het mean > 0.073 and s-het lower bound > 0.021"
+  update: ""
+  visibility: secondary
+  priority: 10
+  category: "Constraint"
+  subcategory: "s-het"
+  source: "Sun et al. Nature 2024"
+  doi: "10.1038/s41586-024-07556-0"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+loeuf:
+  fullname: LOEUF
+  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for loss-of-function variants from gnomAD v4.1.1, based on the Ensembl canonical transcript. Low LOEUF scores indicate strong selection against pLoF variation in a given gene."
+  update: ""
+  visibility: secondary
+  priority: 20
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+moeuf:
+  fullname: MOEUF
+  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for missense variants from gnomAD v4.1.1, based on the Ensembl canonical transcript."
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+soeuf:
+  fullname: SOEUF
+  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for synonymous variants from gnomAD v4.1.1, based on the Ensembl canonical transcript."
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+is_loeuf_gnomad_v4_1_1:
+  fullname: LOEUF score < 0.45
+  description: "A LOEUF threshold of 0.45 can be used to support the interpretation of Mendelian disease. Genes with a LOEUF < 0.45 fall within the 15th percentile, corresponding to the 15% of genes that are most intolerant to loss-of-function variants. The score is available for 17,063 MANE Select transcripts."
+  update: ""
+  visibility: secondary
+  priority: 10
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+gnomad_gene_flags:
+  fullname: gnomAD gene flags
+  description: "gnomAD v4.1.1 gene-level quality flags: low_exome_coverage, low_exome_mapping_quality, or both"
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+gnomad_constraint_flags:
+  fullname: gnomAD constraint flags
+  description: "1,348 MANE Select transcripts are flagged in constraint analyses based on: (1) no expected variants, (2) far too many synonymous, missense or pLoF variants, (3) far too few synonymous variants."
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Constraint"
+  subcategory: "gnomAD"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  doi: "10.1038/s41586-020-2308-7"
+  licence: CC0-1.0
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+constraint:
+  fullname: Constrained genes
+  description: "A gene is considered constrained if it meets the threshold of at least one of the two constraint scores, s-het or LOEUF: s-het mean > 0.073 and s-het lower bound > 0.021, or LOEUF score < 0.45."
+  update: "20260612"
+  visibility: primary
+  priority: 10
+  category: "Constraint"
+  subcategory: ""
+  source: "combined constraint call"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+eagle_score:
+  fullname: EAGLE class
+  description: "EAGLE reflects phenotypic specificity to autism: it assesses whether a gene is linked to autism as such, rather than to a broad range of neurodevelopmental phenotypes. The EAGLE class is Definitive, Strong, Moderate or Limited."
+  update: "20260322"
+  visibility: secondary
+  priority: 20
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "https://gene.sfari.org/about-gene-scoring/eagle-score/ - EAGLE score, 2026-03-22 release"
+  doi: "10.1038/s41576-020-0231-2"
+  licence: SFARI Gene terms (reuse with citation)
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+eagle_points:
+  fullname: EAGLE score
+  description: "EAGLE reflects phenotypic specificity to autism: it assesses whether a gene is linked to autism as such, rather than to a broad range of neurodevelopmental phenotypes. The EAGLE score is numeric; higher values indicate stronger autism specificity."
+  update: "20260322"
+  visibility: hidden
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "https://gene.sfari.org/about-gene-scoring/eagle-score/ - EAGLE score, 2026-03-22 release"
+  doi: "10.1038/s41576-020-0231-2"
+  licence: SFARI Gene terms (reuse with citation)
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+inheritance_v7:
+  fullname: Mode of inheritance v7
+  description: "Mode of inheritance in NDDs, version 7, combining data from PanelApp Australia and SysNDD for the genes of hc_ndd_v7."
+  update: "20260710"
+  visibility: primary
+  priority: 10
+  category: "Inheritance"
+  subcategory: ""
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: external
+  derived_from: [inheritance_panelapp_20260617, inheritance_sysndd_definitive_v0_11_2]
+  aliases: [inheritance]
+inheritance_panelapp_20260617:
+  fullname: Mode of inheritance from PanelApp Aus
+  description: "Mode of inheritance in NDDs, combining data from the PanelApp Australia autism, genetic epilepsy, progressive myoclonic epilepsy, intellectual disability syndromic and nonsyndromic, and speech apraxia panels."
+  update: "20260617"
+  visibility: secondary
+  priority: null
+  category: "Inheritance"
+  subcategory: ""
+  source: "PanelApp Australia, 2026-06-17"
+  doi: "10.1038/s41588-019-0528-2"
+  licence: None stated (PanelApp Australia)
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+inheritance_sysndd_definitive_v0_11_2:
+  fullname: Mode of inheritance from SysNDD
+  description: "Mode of inheritance from SysNDD v0.11.2, restricted to its definitive genes associated to NDD."
+  update: "20260323"
+  visibility: secondary
+  priority: null
+  category: "Inheritance"
+  subcategory: ""
+  source: "SysNDD https://sysndd.dbmr.unibe.ch/ v0.11.2"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: categorical
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: null
+  derived_from: []
+  aliases: []
+chrom_epi_tf_combined:
+  fullname: Chromatin, epigenetic or TF gene
+  description: "Genes annotated with ontology terms related to epigenetic regulators and chromatin remodellors, epigenetic factors and transcription factors."
+  update: ""
+  visibility: primary
+  priority: 10
+  category: "Function"
+  subcategory: ""
+  source: "union of the four sources"
+  doi: ""
+  licence: CC-BY-SA-4.0 (includes TRRUST)
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: union
+  derived_from: [chromatin_remodeling, epifactors_v2_1, rummagene_tf, trrust_v2_tf]
+  aliases: []
+autism_genes_v7:
+  fullname: Autism genes v7
+  description: "Autism genes of HC-NDD v7: SFARI Gene score 1, SPARK, and the green genes of the PanelApp Australia Autism panel. The union of the autism, IDD and epilepsy gene lists v7 is hc_ndd_v7 (Korkmaz et al. 2026, Biol Psychiatry)."
+  update: "20260710"
+  visibility: primary
+  priority: 10
+  category: "NDD gene lists"
+  subcategory: "Autism"
+  source: "GeneTrek curation"
+  doi: "10.1016/j.biopsych.2026.10.003"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: union
+  derived_from: [sfari_1_20260322, spark_20250617, panelapp_aus_autism_20260331]
+  aliases: [autism_genes]
+cancer_combined_ncg_7_2:
+  fullname: Cancer gene (any source)
+  description: "In NCG 7.2 or on the PanelApp Australia paediatric cancer predisposition panel. The two overlap on only 76 genes."
+  update: ""
+  visibility: secondary
+  priority: 10
+  category: "Other gene lists"
+  subcategory: "Cancer"
+  source: "union of NCG 7.2 and the PanelApp paediatric cancer panel"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "GeneListForGeneTrek_20260904.txt"
+  derived_op: union
+  derived_from: [cancer_ncg_7_2, panelapp_aus_cancer_predisposition]
+  aliases: []
+hc_ndd_v2:
+  fullname: High-confidence NDD v2
+  description: "High-confidence neurodevelopmental disorder genes, version 2"
+  update: ""
+  visibility: secondary
+  priority: 50
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+hc_ndd_v1:
+  fullname: High-confidence NDD v1
+  description: "High-confidence neurodevelopmental disorder genes, version 1"
+  update: ""
+  visibility: secondary
+  priority: 60
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+candidate_ndd_v4:
+  fullname: Candidate NDD v4
+  description: "Candidate neurodevelopmental disorder genes, version 4. Not updated for HC-NDD v7: built against an earlier HC-NDD, so 435 of its genes are also in hc_ndd_v7. An updated candidate list, with no gene in common with HC-NDD, will follow soon."
+  update: ""
+  visibility: secondary
+  priority: 70
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+candidate_ndd_v3:
+  fullname: Candidate NDD v3
+  description: "Candidate neurodevelopmental disorder genes, version 3. Not updated for HC-NDD v7: built against an earlier HC-NDD, so 435 of its genes are also in hc_ndd_v7. An updated candidate list, with no gene in common with HC-NDD, will follow soon."
+  update: ""
+  visibility: secondary
+  priority: 80
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+candidate_ndd_v2:
+  fullname: Candidate NDD v2
+  description: "Candidate neurodevelopmental disorder genes, version 2. Not updated for HC-NDD v7: built against an earlier HC-NDD, so 452 of its genes are also in hc_ndd_v7. An updated candidate list, with no gene in common with HC-NDD, will follow soon."
+  update: ""
+  visibility: secondary
+  priority: 90
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+candidate_ndd_v1:
+  fullname: Candidate NDD v1
+  description: "Candidate neurodevelopmental disorder genes, version 1. Not updated for HC-NDD v7: built against an earlier HC-NDD, so 550 of its genes are also in hc_ndd_v7. An updated candidate list, with no gene in common with HC-NDD, will follow soon."
+  update: ""
+  visibility: secondary
+  priority: 100
+  category: "NDD gene lists"
+  subcategory: "GeneTrek"
+  source: "GeneTrek curation"
+  doi: ""
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+haploinsufficient:
+  fullname: Haploinsufficient
+  description: "Predicted haploinsufficient (pHaplo >= 0.86): losing one copy of the gene is predicted to be deleterious. Null where no pHaplo score was computed."
+  update: ""
+  visibility: secondary
+  priority: null
+  category: "Constraint"
+  subcategory: "Dosage sensitivity"
+  source: "Collins et al., Cell 2022"
+  doi: "10.1016/j.cell.2022.06.036"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+triplosensitive:
+  fullname: Triplosensitive
+  description: "Predicted triplosensitive (pTriplo >= 0.94): an additional copy of the gene is predicted to be deleterious. Null where no pTriplo score was computed."
+  update: ""
+  visibility: secondary
+  priority: null
+  category: "Constraint"
+  subcategory: "Dosage sensitivity"
+  source: "Collins et al., Cell 2022"
+  doi: "10.1016/j.cell.2022.06.036"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "genetrek-data-2024-04-26.tsv"
+  derived_op: null
+  derived_from: []
+  aliases: []
+37365347_number_of_carriers_among_autistic_individuals:
+  fullname: Number of carriers among autistic individuals
+  description: ""
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Publications"
+  subcategory: "PMID 37365347"
+  source: ""
+  doi: "10.1038/s41591-023-02408-2"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: integer
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "carried over from resources (1,402 genes)"
+  derived_op: null
+  derived_from: []
+  aliases: []
+37365347_autism_or:
+  fullname: Autism odds ratio
+  description: ""
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Publications"
+  subcategory: "PMID 37365347"
+  source: ""
+  doi: "10.1038/s41591-023-02408-2"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "carried over from resources (1,402 genes)"
+  derived_op: null
+  derived_from: []
+  aliases: []
+37365347_p_value:
+  fullname: p-value
+  description: ""
+  update: ""
+  visibility: hidden
+  priority: null
+  category: "Publications"
+  subcategory: "PMID 37365347"
+  source: ""
+  doi: "10.1038/s41591-023-02408-2"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20260924"
+  source_file: "carried over from resources (1,402 genes)"
+  derived_op: null
+  derived_from: []
+  aliases: []
+jiang2020_brain_ts:
+  fullname: Brain protein TS (Jiang 2020)
+  description: "Tissue-specificity (TS) score of the protein in brain, from the GTEx quantitative proteome (Jiang et al. 2020, Table S2): the higher of Brain Cortex and Brain Cerebellum. TS is a robust z-score of the protein's relative abundance in that tissue against its body-wide distribution (AdaTiSS), capped at +/-10; 2.5 is the paper's tissue-enriched threshold and 4 its tissue-specific one. 0 is average abundance, not absence. Null: not quantified in either brain tissue (scores seen in a single replicate count as not quantified, as in the paper). Measured for 8,911 genes."
+  update: "20200917"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Brain proteome"
+  source: "Jiang et al. 2020, Cell 183:269 -- Table S2, sheet 'G protein TS score'"
+  doi: "10.1016/j.cell.2020.08.036"
+  licence: Not open (Elsevier open archive; non-commercial)
+  universe: "Proteins with a TS score in Brain Cortex or Brain Cerebellum (Jiang et al. 2020, Table S2; TMT proteomics of 32 GTEx tissues)"
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "jiang2020_mmc3_tableS2.xlsx"
+  derived_op: null
+  derived_from: []
+  aliases: []
+jiang2020_brain_enriched:
+  fullname: Brain-enriched protein (Jiang 2020)
+  description: "The paper's own call: the protein is tissue-enriched in Brain Cortex or Brain Cerebellum (TS >= 2.5 with at least 3 quantified tissues; Table S4 category prt_specific or prt_enriched_not_spec). Not exclusive -- the protein may be enriched elsewhere too: 951 of the 1,783 source proteins are enriched in brain only, and 209 rest on the cerebellum alone. False: quantified in brain and not enriched there. Null: not quantified in brain."
+  update: "20200917"
+  visibility: primary
+  priority: 10
+  category: "Expression"
+  subcategory: "Brain proteome"
+  source: "Jiang et al. 2020, Cell 183:269 -- Table S4, sheet 'A enrichment comparison'"
+  doi: "10.1016/j.cell.2020.08.036"
+  licence: Not open (Elsevier open archive; non-commercial)
+  universe: "Proteins with a TS score in Brain Cortex or Brain Cerebellum (Jiang et al. 2020, Table S2; TMT proteomics of 32 GTEx tissues)"
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "jiang2020_mmc5_tableS4.xlsx"
+  derived_op: external
+  derived_from: [jiang2020_brain_ts]
+  aliases: []
+brainspan_prenatal_log2fc:
+  fullname: Prenatal log2FC (BrainSpan)
+  description: "Prenatal bias of brain expression in BrainSpan: log2 fold change of prenatal over postnatal expression (prenatal = 8-23 post-conception weeks (15 donors), postnatal = birth to 40 years (22 donors), late fetal (24-37 pcw) excluded), as the mean over 16 brain regions of the per-region difference in mean log2(RPKM + 1). Positive = higher before birth. 0 = no difference, including genes measured at 0 RPKM throughout. Null: not in BrainSpan. Measured for 37,197 genes."
+  update: "20131008"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Brain development"
+  source: "BrainSpan Atlas of the Developing Human Brain -- RNA-Seq Gencode v10 summarized to genes"
+  doi: "10.1038/nature10523"
+  licence: Allen Institute Terms of Use (non-commercial)
+  universe: "Genes in the BrainSpan RNA-seq gene matrix (GENCODE v10, 52,376 rows), compared over 16 brain regions"
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "brainspan_genes_matrix_csv.zip"
+  derived_op: null
+  derived_from: []
+  aliases: []
+brainspan_prenatal_biased:
+  fullname: Prenatal-biased (BrainSpan)
+  description: "Prenatal log2FC >= 1 and Benjamini-Hochberg FDR < 0.05, testing prenatal against postnatal donors (Mann-Whitney, one value per donor: the mean over its regions of region-centred log2 RPKM). Prenatal = 8-23 post-conception weeks (15 donors), postnatal = birth to 40 years (22 donors), late fetal (24-37 pcw) excluded. False: measured, not prenatal-biased. Null: not in BrainSpan."
+  update: "20131008"
+  visibility: primary
+  priority: 10
+  category: "Expression"
+  subcategory: "Brain development"
+  source: "BrainSpan Atlas of the Developing Human Brain -- RNA-Seq Gencode v10 summarized to genes"
+  doi: "10.1038/nature10523"
+  licence: Allen Institute Terms of Use (non-commercial)
+  universe: "Genes in the BrainSpan RNA-seq gene matrix (GENCODE v10, 52,376 rows), compared over 16 brain regions"
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "brainspan_genes_matrix_csv.zip"
+  derived_op: external
+  derived_from: [brainspan_prenatal_log2fc]
+  aliases: []
+gtex_v11_brain_max_tpm:
+  fullname: Brain max TPM (GTEx v11)
+  description: "Brain expression level: the highest median TPM over the 10 GTEx brain regions, one per duplicate pair (Frontal Cortex BA9 rather than Cortex, Cerebellar Hemisphere rather than Cerebellum; spinal cord not used), cerebellum included. 0 = measured, not expressed in any region. Null: not in GTEx v11. Measured for 40,377 genes."
+  update: "20250822"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix (GENCODE v47, 74,628 genes)"
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: null
+  derived_from: []
+  aliases: []
+gtex_v11_brain_expressed:
+  fullname: Brain-expressed (GTEx v11)
+  description: "Median TPM >= 1 in at least one of the 10 brain regions of gtex_v11_brain_max_tpm (HPA's detection threshold). False: measured, below that everywhere in the brain. Null: not in GTEx v11."
+  update: "20250822"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix (GENCODE v47, 74,628 genes)"
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: external
+  derived_from: [gtex_v11_brain_max_tpm]
+  aliases: []
+gtex_v11_brain_vs_rest_log2:
+  fullname: Brain vs rest, log2 (GTEx v11)
+  description: "Brain specificity: log2((brain + 0.1) / (highest other tissue + 0.1)) in median TPM, over 30 pseudo-tissues: brain = max over the 10 GTEx brain regions, one per duplicate pair (Frontal Cortex BA9 rather than Cortex, Cerebellar Hemisphere rather than Cerebellum; spinal cord not used); adipose, artery, heart, colon, oesophagus, skin, kidney and cervix each collapsed to their max site; cell lines, LCM samples and tissues under 20 samples excluded. Positive = higher in brain than in any other tissue; 2 = four-fold. Null: not in GTEx v11."
+  update: "20250822"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix (GENCODE v47, 74,628 genes)"
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: null
+  derived_from: []
+  aliases: []
+gtex_v11_tau:
+  fullname: Tissue specificity tau (GTEx v11)
+  description: "Yanai's tau over log2(TPM + 1) of the 30 pseudo-tissues of gtex_v11_brain_vs_rest_log2: 0 = same level everywhere, 1 = expressed in one tissue only. Says how specific, not where: a testis-only gene scores as high as a brain-only one, so read it with gtex_v11_brain_vs_rest_log2. Null: not in GTEx v11, or 0 TPM in every tissue (tau undefined). Defined for 31,875 genes."
+  update: "20250822"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix with TPM > 0 in at least one of the 30 pseudo-tissues (tau is undefined for a gene expressed nowhere)"
+  value_type: float
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: null
+  derived_from: []
+  aliases: []
+gtex_v11_brain_enriched:
+  fullname: Brain-enriched (GTEx v11)
+  description: "Brain >= 1 TPM and gtex_v11_brain_vs_rest_log2 >= 2: at least four-fold higher in the brain (cerebellum included) than in every other tissue (HPA's 'tissue enriched'), with brain one tissue among others. See gtex_v11_cerebellum_enriched for the cerebellar subset. False: measured, not brain-enriched. Null: not in GTEx v11."
+  update: "20250822"
+  visibility: primary
+  priority: 10
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix (GENCODE v47, 74,628 genes)"
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: external
+  derived_from: [gtex_v11_brain_vs_rest_log2]
+  aliases: []
+gtex_v11_cerebellum_enriched:
+  fullname: Cerebellum-enriched (GTEx v11)
+  description: "Cerebellar Hemisphere >= 1 TPM and at least four-fold higher (log2((cerebellum + 0.1) / (highest other + 0.1)) >= 2) than in every other brain region of gtex_v11_brain_max_tpm and every other tissue of gtex_v11_brain_vs_rest_log2. Brain-enriched genes driven by the cerebellum; a gene high in cerebellum and cortex alike is brain-enriched, not cerebellum-enriched. False: measured, not cerebellum-enriched. Null: not in GTEx v11."
+  update: "20250822"
+  visibility: secondary
+  priority: null
+  category: "Expression"
+  subcategory: "Adult tissues"
+  source: "GTEx Analysis v11 -- gene median TPM by tissue (RNASeQC v2.4.3, GENCODE v47)"
+  doi: "10.1126/science.aaz1776"
+  licence: GTEx Portal Data License
+  universe: "Genes in the GTEx v11 median-TPM matrix (GENCODE v47, 74,628 genes)"
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261007"
+  source_file: "gtex_v11_gene_median_tpm.gct.gz"
+  derived_op: null
+  derived_from: []
+  aliases: []
+idd_genes_v7:
+  fullname: IDD genes v7
+  description: "Intellectual developmental disorder genes of HC-NDD v7: SysNDD Definitive, and the green genes of the PanelApp Australia and Genomics England intellectual disability panels. The Genomics England panels are not published as columns. The union of the autism, IDD and epilepsy gene lists v7 is hc_ndd_v7 (Korkmaz et al. 2026, Biol Psychiatry)."
+  update: "20260710"
+  visibility: primary
+  priority: 10
+  category: "NDD gene lists"
+  subcategory: "IDD"
+  source: "GeneTrek curation"
+  doi: "10.1016/j.biopsych.2026.10.003"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261027"
+  source_file: ""
+  derived_op: external
+  derived_from: [sysndd_definitive_v0_11_2, panelapp_aus_id_20260331]
+  aliases: [idd_genes]
+epilepsy_genes_v7:
+  fullname: Epilepsy genes v7
+  description: "Epilepsy genes of HC-NDD v7: the green genes of the PanelApp Australia Genetic epilepsy and Progressive myoclonic epilepsy panels, and of the Genomics England Early onset or syndromic epilepsy panel. The Genomics England panel is not published as a column. The union of the autism, IDD and epilepsy gene lists v7 is hc_ndd_v7 (Korkmaz et al. 2026, Biol Psychiatry)."
+  update: "20260710"
+  visibility: primary
+  priority: 10
+  category: "NDD gene lists"
+  subcategory: "Epilepsy"
+  source: "GeneTrek curation"
+  doi: "10.1016/j.biopsych.2026.10.003"
+  licence: CC-BY-4.0
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261027"
+  source_file: ""
+  derived_op: external
+  derived_from: [panelapp_aus_epilepsy_20260331, panelapp_aus_myoclonic_epilepsy_20260331]
+  aliases: [epilepsy_genes]
+adhd_demontis2023:
+  fullname: ADHD genes (Demontis 2023)
+  description: "ADHD genes from Demontis et al. 2023. Preliminary: not part of HC-NDD v7, and may join HC-NDD in v8."
+  update: ""
+  visibility: secondary
+  priority: null
+  category: "NDD gene lists"
+  subcategory: "Other"
+  source: "Demontis et al. 2023, Nat Genet 55:198-208"
+  doi: "10.1038/s41588-022-01285-8"
+  licence: Not open (Nat Genet 2023); factual gene list
+  universe: ""
+  value_type: boolean
+  id_type: null
+  assembly: ""
+  primary_key: false
+  added: "20261027"
+  source_file: ""
+  derived_op: null
+  derived_from: []
+  aliases: []
