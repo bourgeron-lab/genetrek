@@ -25,10 +25,15 @@ that defines them:
 > ADHD.** Biol Psychiatry. 2026.
 > [doi:10.1016/j.biopsych.2026.10.003](https://doi.org/10.1016/j.biopsych.2026.10.003).
 
-To cite the database itself, as of a given release, cite its Zenodo deposit:
+To cite the database or the software itself, as of a given release, cite their Zenodo
+deposits:
 
 > GeneTrek database, HC-NDD v7 (GeneTrek 2.0.0). Zenodo. 2026.
 > [doi:10.5281/zenodo.23692280](https://doi.org/10.5281/zenodo.23692280).
+
+> GeneTrek 2.0.0 (software). Zenodo. 2026.
+> [doi:10.5281/zenodo.23693065](https://doi.org/10.5281/zenodo.23693065). Every version:
+> [doi:10.5281/zenodo.23693064](https://doi.org/10.5281/zenodo.23693064).
 
 Please also say which version of a gene list you used — `hc_ndd_v7` rather than
 `hc_ndd` — and the date you downloaded the data. Versions coexist and the short

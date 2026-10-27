@@ -1,5 +1,10 @@
 # GeneTrek
 
+[![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23693064.svg)](https://doi.org/10.5281/zenodo.23693064)
+[![Dataset DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23692280.svg)](https://doi.org/10.5281/zenodo.23692280)
+[![CI](https://github.com/bourgeron-lab/genetrek/actions/workflows/ci.yml/badge.svg)](https://github.com/bourgeron-lab/genetrek/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+
 GeneTrek brings together curated gene lists for neurodevelopmental disorders (NDD) and
 per-gene annotations — gene constraint, brain expression, rare-variant results in autism —
 in one versioned table. Search genes or loci, compare your own lists with known NDD genes
@@ -108,6 +113,10 @@ source's terms and cite its source.
   [doi:10.1016/j.biopsych.2026.10.003](https://doi.org/10.1016/j.biopsych.2026.10.003)
 - **Every source you rely on:** see [How to cite](https://genetrek.pasteur.fr/cite) and each
   column's metadata. Name the list version you used (`hc_ndd_v7`, not `hc_ndd`).
+
+- **This software:** [doi:10.5281/zenodo.23693064](https://doi.org/10.5281/zenodo.23693064) (all versions;
+  v2.0.0 is [doi:10.5281/zenodo.23693065](https://doi.org/10.5281/zenodo.23693065)). **The database:**
+  [doi:10.5281/zenodo.23692280](https://doi.org/10.5281/zenodo.23692280).
 
 [CITATION.cff](CITATION.cff) carries the same information for citation tools.
 

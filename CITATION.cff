@@ -8,6 +8,17 @@ type: software
 title: GeneTrek
 version: 2.0.0
 license: MIT
+doi: 10.5281/zenodo.23693064
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23693064
+    description: GeneTrek software, all versions (Zenodo concept DOI)
+  - type: doi
+    value: 10.5281/zenodo.23693065
+    description: GeneTrek 2.0.0 (Zenodo)
+  - type: doi
+    value: 10.5281/zenodo.23692280
+    description: GeneTrek database, HC-NDD v7 (Zenodo)
 url: https://genetrek.pasteur.fr
 repository-code: https://github.com/bourgeron-lab/genetrek
 abstract: >-
