@@ -15,8 +15,9 @@ so, and the only remaining copy is the published release it shipped in.
 
 **Archived.** The code is release
 [v2.0.0](https://github.com/bourgeron-lab/genetrek/releases/tag/v2.0.0) of
-<https://github.com/bourgeron-lab/genetrek>. The database is deposited on Zenodo,
-with every column's licence, as
+<https://github.com/bourgeron-lab/genetrek>, archived on Zenodo as
+[doi:10.5281/zenodo.23693065](https://doi.org/10.5281/zenodo.23693065). The database is deposited on
+Zenodo, with every column's licence, as
 [doi:10.5281/zenodo.23692280](https://doi.org/10.5281/zenodo.23692280).
 
 The first public release of GeneTrek 2. It brings the features of the entries
