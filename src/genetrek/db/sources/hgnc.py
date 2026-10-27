@@ -163,6 +163,13 @@ def read(path: Path, columns: list[str] | None = None) -> pl.DataFrame:
         truncate_ragged_lines=True,
         quote_char=None,
     )
+    # HGNC wraps every multi-valued field in double quotes ("A|B"). Read with
+    # quote_char=None, those quotes would land in the values -- they did, in
+    # every multi-valued alias, previous symbol, RefSeq, OMIM and MANE entry --
+    # so strip the wrapping pair here, and only a wrapping pair.
+    frame = frame.with_columns(
+        pl.col(column).str.replace(r'^"(.*)"$', "${1}") for column in frame.columns
+    )
     wanted = list(columns) if columns else frame.columns
     for needed in REQUIRED_COLUMNS:
         if needed not in wanted and needed in frame.columns:

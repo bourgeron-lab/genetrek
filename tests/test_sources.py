@@ -97,6 +97,21 @@ def test_read_keeps_identifiers_as_text(tmp_path: Path):
     assert frame["entrez_id"].to_list()[:3] == ["85358", "31", "100"]
 
 
+def test_read_strips_the_quotes_around_multi_valued_fields(tmp_path: Path):
+    """HGNC writes "A|B"; the quotes are not part of the value."""
+    path = tmp_path / "hgnc.txt"
+    path.write_text(
+        "hgnc_id\tsymbol\talias_symbol\tmane_select\n"
+        'HGNC:1\tA1BG\t"ACF|ASP"\t"ENST00000263100.8|NM_130786.4"\n'
+        "HGNC:2\tA2M\tFWP007\t\n"
+        'HGNC:3\tA3\tsay "hi"\t\n',
+        encoding="utf-8",
+    )
+    frame = hgnc.read(path, ["symbol", "alias_symbol", "mane_select"])
+    assert frame["alias_symbol"].to_list() == ["ACF|ASP", "FWP007", 'say "hi"']
+    assert frame["mane_select"].to_list()[0] == "ENST00000263100.8|NM_130786.4"
+
+
 def test_read_always_keeps_the_columns_resolution_needs(tmp_path: Path):
     path = tmp_path / "hgnc.txt"
     path.write_text(hgnc_body(), encoding="utf-8")

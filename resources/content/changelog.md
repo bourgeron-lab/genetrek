@@ -68,6 +68,9 @@ around High-confidence NDD v7 ([documentation](/documentation)).
   `candidate_ndd_v1` to `candidate_ndd_v5` are no longer shown by default, and
   each description gives how many genes it shares with HC-NDD v7.
 - **`hc_ndd_v7`** is dated 2026-07-10.
+- **HGNC fields with several values** no longer carry literal quotes: `"A|B"` is
+  now `A|B` in `hgnc_alias_symbol`, `hgnc_prev_symbol`, `refseq_accession`,
+  `omim_id` and `mane_select` (32,952 values, every `mane_select` among them).
 - **Documentation.** The [documentation](/documentation) now describes how
   HC-NDD v7, the candidate lists and the mode of inheritance are built, and the
   [How to cite](/cite) page what to cite for each.

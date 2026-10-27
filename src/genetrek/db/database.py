@@ -899,6 +899,39 @@ class Database:
         )
         return self.get_field(name)
 
+    def set_values(self, name: str, values: pl.Series) -> BoundField:
+        """Replace a field's values in place, keeping its metadata and position.
+
+        For correcting data already in the table -- a parsing fix, say -- not
+        for a new release of a source, which is a new, versioned field. The
+        values must line up with the rows and keep the column's dtype.
+
+        Raises:
+            KeyError: If ``name`` is not a field.
+            DatabaseError: If ``values`` has the wrong length or dtype, or the
+                field is a rule: change its sources and ``recompute_derived``.
+        """
+        if name not in self._fields:
+            msg = f"unknown field: {name!r}"
+            raise KeyError(msg)
+        if self._fields[name].is_rule:
+            msg = (
+                f"{name!r} is computed by its rule; change its sources and call "
+                f"recompute_derived() instead"
+            )
+            raise DatabaseError(msg)
+        current = self._frame[name]
+        if values.len() != current.len():
+            msg = f"{name!r} needs {current.len():,} values, got {values.len():,}"
+            raise DatabaseError(msg)
+        if values.dtype != current.dtype:
+            msg = f"{name!r} is {current.dtype}, got {values.dtype}"
+            raise DatabaseError(msg)
+        changed = int((values.ne_missing(current)).sum())
+        self._frame = self._frame.with_columns(values.alias(name))
+        self._pending.append({"op": "set_values", "field": name, "changed": changed})
+        return self.get_field(name)
+
     def recompute_derived(self, *, names: Iterable[str] | None = None) -> list[str]:
         """Re-evaluate derived columns, returning the ones whose values changed.
 
