@@ -914,3 +914,28 @@ class TestAliasValidation:
         )
         with pytest.raises(FieldsYamlError, match="duplicate aliases"):
             Database.open(resources.root)
+
+
+class TestSetValues:
+    def test_replaces_values_and_keeps_metadata_and_position(self, db):
+        position = db.frame.columns.index("note")
+        meta = db.fields["note"].model_dump()
+        fixed = db.frame["note"].str.to_uppercase()
+        db.set_values("note", fixed)
+        assert db.frame["note"].equals(fixed)
+        assert db.frame.columns.index("note") == position
+        assert db.fields["note"].model_dump() == meta
+        assert db.validate().ok
+
+    def test_refuses_the_wrong_length(self, db):
+        with pytest.raises(DatabaseError, match="needs"):
+            db.set_values("note", db.frame["note"].head(2))
+
+    def test_refuses_another_dtype(self, db):
+        with pytest.raises(DatabaseError, match="String"):
+            db.set_values("note", pl.Series("note", [1] * db.frame.height))
+
+    def test_refuses_a_rule(self, db):
+        db.add_derived_field("either", ["flag_a", "flag_b"])
+        with pytest.raises(DatabaseError, match="recompute_derived"):
+            db.set_values("either", db.frame["either"])
