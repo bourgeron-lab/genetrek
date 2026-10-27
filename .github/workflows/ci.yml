@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v5
       - run: helm lint ./chart --set image.repository=example --set image.tag=test
       - run: helm template genetrek ./chart --set image.repository=example --set image.tag=test
       # An all-digit short sha arrives from --set as an int64; the image name must
