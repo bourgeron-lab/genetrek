@@ -360,6 +360,11 @@ class TestIdentifiersFromText:
             "SCN2A",
         ]
 
+    def test_a_list_copied_out_of_code(self):
+        text = "genes = [\n    'SHANK3',\n    'MECP2',\n]\n"
+        assert ul.identifiers_from_text(text) == ["SHANK3", "MECP2"]
+        assert ul.identifiers_from_text('c("SHANK3", "MECP2")') == ["SHANK3", "MECP2"]
+
     def test_a_tsv_reads_its_first_column(self):
         text = "# genes\nsymbol\tscore\nSHANK3\t0.9\nMECP2 \t0.1\n"
         assert ul.identifiers_from_text(text) == ["symbol", "SHANK3", "MECP2"]

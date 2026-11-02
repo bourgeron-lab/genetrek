@@ -40,6 +40,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import polars as pl
 
+from genetrek.services.search import split_tokens
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
     from zoneinfo import ZoneInfo
@@ -639,7 +641,9 @@ def identifiers_from_text(text: str) -> list[str]:
 
     One per line, first column -- so a spreadsheet export with extra columns
     still reads. Blank lines and ``#`` comments are skipped. A pasted line of
-    several space- or comma-separated identifiers contributes all of them.
+    several space- or comma-separated identifiers contributes all of them, and
+    a list copied out of Python or R code reads as its elements
+    (:func:`genetrek.services.search.split_tokens`).
     """
     values: list[str] = []
     rows = text.splitlines()
@@ -653,7 +657,7 @@ def identifiers_from_text(text: str) -> list[str]:
             if first:
                 values.append(first)
         else:
-            values.extend(v for v in re.split(r"[,;\s]+", line) if v)
+            values.extend(split_tokens(line))
     return values
 
 

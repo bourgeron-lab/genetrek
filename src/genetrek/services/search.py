@@ -45,6 +45,30 @@ _COMMA_LOCUS_RE = re.compile(
     re.IGNORECASE,
 )
 
+#: The constructors a gene list copied out of code is wrapped in: R's ``c(...)``
+#: and ``list(...)``, Python's ``set(...)``, ``tuple(...)``, ``frozenset(...)``.
+#: Only the name and its parenthesis go; the brackets go with the quotes below.
+#: Case-sensitive, so a symbol such as ``C3`` is never mistaken for one.
+_LIST_CALL = r"(?<![\w.])(?:c|list|set|frozenset|tuple)\s*\("
+_LIST_CALL_RE = re.compile(_LIST_CALL, re.ASCII)
+
+#: The name a pasted list was assigned to (``genes = [...]``,
+#: ``genes <- c(...)``). Only removed directly before a list, where it cannot
+#: be an identifier; left in, it would be searched as a gene symbol.
+_LIST_ASSIGNMENT_RE = re.compile(
+    rf"(?<![\w.])[A-Za-z_.][\w.]*\s*(?:=|<-)\s*(?=[\[({{]|{_LIST_CALL})",
+    re.ASCII,
+)
+
+#: Brackets and quotes around a pasted list and its elements. No identifier or
+#: locus contains one, and left in they stick to the first and last tokens:
+#: ``['SHANK3', 'CHD8']`` used to search for ``[SHANK3`` and ``CHD8]``, so the
+#: genes at either end silently found nothing.
+_LIST_WRAPPER_RE = re.compile(r"""[\[\](){}"'`]""")
+
+#: What separates two tokens.
+_DELIMITER_RE = re.compile(r"[,;\s]+")
+
 #: Spellings of the mitochondrial contig that all mean the same thing.
 _MITO_SPELLINGS = ("M", "MT")
 
@@ -57,6 +81,24 @@ def _chromosome_aliases(chromosome: str) -> tuple[str, ...]:
     if chromosome in _MITO_SPELLINGS:
         return _MITO_SPELLINGS
     return (chromosome,)
+
+
+def split_tokens(text: str) -> list[str]:
+    """The search tokens in typed or pasted text, in order.
+
+    Tokens are separated by commas, semicolons or whitespace. A list copied out
+    of Python or R code -- ``['SHANK3', 'CHD8']``, ``c("SHANK3", "CHD8")``, even
+    with its assignment -- reads as the genes it lists. ``splitTokens`` in
+    ``ui/js/token_editor.js`` mirrors this, so the badges show what is searched;
+    ``tests/test_search.py`` runs both over the same cases.
+    """
+    # Separators inside a locus go before the split, never after: once the text
+    # is in pieces the digits are indistinguishable from gene IDs.
+    cleaned = _COMMA_LOCUS_RE.sub(lambda m: m.group(0).replace(",", ""), text)
+    cleaned = _LIST_ASSIGNMENT_RE.sub(" ", cleaned)
+    cleaned = _LIST_CALL_RE.sub(" ", cleaned)
+    cleaned = _LIST_WRAPPER_RE.sub(" ", cleaned)
+    return [token for token in _DELIMITER_RE.split(cleaned) if token]
 
 
 class SearchUnavailableError(RuntimeError):
@@ -148,14 +190,7 @@ def _build_token_condition(  # noqa: PLR0912, PLR0913
     if not search_text or not search_text.strip():
         return None
 
-    # Separators inside a locus go before the split, never after: once the text
-    # is in pieces the digits are indistinguishable from gene IDs.
-    cleaned = _COMMA_LOCUS_RE.sub(
-        lambda m: m.group(0).replace(",", ""),
-        search_text.strip(),
-    )
-    tokens = re.split(r"[,;\s\t\n]+", cleaned)
-    tokens = [t.strip() for t in tokens if t.strip()]
+    tokens = split_tokens(search_text)
 
     ensembl_ids: list[str] = []
     ncbi_ids: list[str] = []
@@ -367,11 +402,7 @@ def parse_search_link(
     """
     if not search or not search.strip():
         return None
-    cleaned = _COMMA_LOCUS_RE.sub(
-        lambda m: m.group(0).replace(",", ""),
-        search.strip(),
-    )
-    tokens = [t for t in re.split(r"[,;\s]+", cleaned) if t]
+    tokens = split_tokens(search)
     if not tokens:
         return None
     kept = tuple(dict.fromkeys(tokens))[:MAX_LINK_TOKENS]

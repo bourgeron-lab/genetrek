@@ -4,6 +4,38 @@
  *   { hiddenTextareaId, tokenColors }
  */
 (function() {
+    // Mirrors split_tokens in services/search.py, which is what actually
+    // decides the query; this keeps the badges honest about what is being
+    // searched. tests/test_search.py runs both over the same cases.
+    const delimiterRegex = /[,;\s]+/;
+    // Thousands separators inside a locus, stripped before the split below.
+    // UCSC -- which the gene dialog links out to -- prints
+    // chr22:50,674,408-50,733,212, so pasting one back is an obvious move,
+    // and splitting on its commas first would scatter it across five
+    // meaningless badges. The span cannot end on a comma, or the strip would
+    // swallow whatever token follows.
+    const commaLocusRegex =
+        /(?:chr)?(?:\d+|X|Y|MT|M):\d(?:[\d,]*\d)?-\d(?:[\d,]*\d)?/gi;
+    // A list copied out of Python or R code: the name it was assigned to,
+    // the constructor (c(...), list(...), set(...)), then the brackets and
+    // quotes. Left in, they stuck to the first and last genes, which then
+    // silently found nothing.
+    const listCall = String.raw`(?<![\w.])(?:c|list|set|frozenset|tuple)\s*\(`;
+    const listCallRegex = new RegExp(listCall, 'g');
+    const listAssignmentRegex = new RegExp(
+        String.raw`(?<![\w.])[A-Za-z_.][\w.]*\s*(?:=|<-)\s*(?=[\[({]|` + listCall + ')', 'g');
+    const listWrapperRegex = /[\[\](){}"'`]/g;
+
+    function splitTokens(raw) {
+        const cleaned = raw
+            .replace(commaLocusRegex, function(m) { return m.replace(/,/g, ''); })
+            .replace(listAssignmentRegex, ' ')
+            .replace(listCallRegex, ' ')
+            .replace(listWrapperRegex, ' ');
+        return cleaned.split(delimiterRegex).filter(Boolean);
+    }
+    window.splitSearchTokens = splitTokens;
+
     function initTokenEditor() {
         const cfg = window._tokenEditorConfig;
         if (!cfg) { setTimeout(initTokenEditor, 100); return; }
@@ -14,17 +46,6 @@
 
         if (!editorBox || !tokenInput) { return; }
 
-        const delimiterRegex = /[,;\s]+/;
-        // Thousands separators inside a locus, stripped before the split below.
-        // UCSC -- which the gene dialog links out to -- prints
-        // chr22:50,674,408-50,733,212, so pasting one back is an obvious move,
-        // and splitting on its commas first would scatter it across five
-        // meaningless badges. Mirrors _COMMA_LOCUS_RE in services/search.py,
-        // which is what actually decides the query; this keeps the badges
-        // honest about what is being searched. The span cannot end on a comma,
-        // or the strip would swallow whatever token follows.
-        const commaLocusRegex =
-            /(?:chr)?(?:\d+|X|Y|MT|M):\d(?:[\d,]*\d)?-\d(?:[\d,]*\d)?/gi;
         const tokenColors = cfg.tokenColors;
 
         function syncToHidden() {
@@ -79,14 +100,7 @@
         function addTokensFromInput() {
             const raw = tokenInput.value;
             if (!raw) return;
-            const joined = raw.replace(commaLocusRegex, function(m) {
-                return m.replace(/,/g, '');
-            });
-            const parts = joined.split(delimiterRegex);
-            parts.forEach(function(t) {
-                t = t.replace(/["'`]/g, '').trim();
-                if (t) createBadge(t);
-            });
+            splitTokens(raw).forEach(createBadge);
             tokenInput.value = '';
         }
 

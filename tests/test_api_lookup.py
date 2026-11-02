@@ -327,6 +327,11 @@ class TestConvert:
         body = client.get("/api/convert?ids=GENE02%20GENE03%3BGENE04").json()
         assert body["n_input"] == 3
 
+    def test_a_python_list_reads_as_its_elements(self, client):
+        body = client.get("/api/convert", params={"ids": "['GENE02', 'GENE03']"}).json()
+        assert body["n_input"] == 2
+        assert body["id_type"] == "symbol"
+
     def test_an_empty_list_is_a_400(self, client):
         assert client.get("/api/convert?ids=%20").status_code == 400
 
