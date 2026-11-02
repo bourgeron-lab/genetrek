@@ -125,7 +125,8 @@ GET /api/convert?ids=SHANK3&to=hgnc,ensg
 GET /api/convert?ids=1,2,3&from=ncbi
 ```
 
-Up to 1000 identifiers per call, separated by commas, spaces or newlines. For more
+Up to 1000 identifiers per call, separated by commas, spaces or newlines; brackets
+and quotes are ignored, so a Python or R list can be passed as it is. For more
 than that, download the whole table from
 [`/api/download/database`](/api/download/database?file_format=tsv) and join
 locally.

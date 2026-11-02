@@ -309,7 +309,9 @@ spaces or newlines. A locus is an interval (`chr22:50674408-50733212`) or a
 single position (`chr22:50700000`); it finds every gene overlapping it.
 With exact matching on (the default), withdrawn and alternative symbols resolve
 to the current gene: `KIAA1109` finds `BLTP1`. Coordinates pasted from a genome
-browser work with or without thousands separators.
+browser work with or without thousands separators, and a list copied out of
+Python or R code (`['SHANK3', 'CHD8']`, `c("SHANK3", "CHD8")`) reads as the genes
+it lists.
 
 ### Linking to GeneTrek
 

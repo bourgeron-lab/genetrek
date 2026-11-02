@@ -8,6 +8,10 @@ wrong chromosome.
 
 from __future__ import annotations
 
+import json
+import shutil
+import subprocess
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -16,12 +20,14 @@ import pytest
 from genetrek.config.loader import load_config
 from genetrek.db.gene_index import GeneIndex
 from genetrek.schema import LocusColumns, Roles
+from genetrek.services import search as search_module
 from genetrek.services.lookup import symbol_resolver
 from genetrek.services.search import (
     MAX_LINK_TOKENS,
     filter_dataframe,
     link_note,
     parse_search_link,
+    split_tokens,
     unmatched_tokens,
 )
 
@@ -210,6 +216,81 @@ class TestOtherTokens:
             assemblies=ROLES.assemblies,
         )
         assert search("HGNC:2", roles=roles) == ["MECP2"]
+
+
+#: Text pasted into the search box, and the tokens it must give. Shared by the
+#: Python splitter and the browser's, which must agree on every one.
+PASTED = [
+    ("SHANK3, MECP2;CHD8\tSCN2A\n", ["SHANK3", "MECP2", "CHD8", "SCN2A"]),
+    ("['SHANK3', 'CHD8', 'SCN2A']", ["SHANK3", "CHD8", "SCN2A"]),
+    ('["SHANK3","CHD8"]', ["SHANK3", "CHD8"]),
+    ("('SHANK3',)", ["SHANK3"]),
+    ("{'SHANK3', 'CHD8'}", ["SHANK3", "CHD8"]),
+    ("set(['SHANK3'])", ["SHANK3"]),
+    ('c("SHANK3", "CHD8")', ["SHANK3", "CHD8"]),
+    ("c('SHANK3','CHD8')", ["SHANK3", "CHD8"]),
+    ('list("SHANK3")', ["SHANK3"]),
+    ("genes = ['SHANK3',\n         'CHD8']", ["SHANK3", "CHD8"]),
+    ('my.genes <- c("SHANK3", "CHD8")', ["SHANK3", "CHD8"]),
+    ("[1234, 5678]", ["1234", "5678"]),
+    ("`SHANK3`", ["SHANK3"]),
+    # What a list's wrappers must not take with them.
+    ("C3 C4A HLA-A", ["C3", "C4A", "HLA-A"]),
+    ("['chr22:50,674,408-50,733,212', 'MECP2']", ["chr22:50674408-50733212", "MECP2"]),
+    ("['HGNC:2', 'ENSG00000251322.5']", ["HGNC:2", "ENSG00000251322.5"]),
+    ("genes MECP2", ["genes", "MECP2"]),
+    (" [ ] , ", []),
+]
+
+
+class TestPastedCodeLists:
+    """A gene list copied out of Python or R code reads as its genes.
+
+    The brackets, ``c(`` and quotes used to stick to the first and last tokens:
+    ``['SHANK3', 'CHD8', 'SCN2A']`` searched for ``[SHANK3`` and ``SCN2A]``, and
+    both genes silently went missing from the results.
+    """
+
+    @pytest.mark.parametrize(("text", "expected"), PASTED)
+    def test_split(self, text, expected):
+        assert split_tokens(text) == expected
+
+    @pytest.mark.parametrize(
+        "text",
+        ["['SHANK3', 'MECP2']", 'c("SHANK3", "MECP2")', "genes <- c('SHANK3','MECP2')"],
+    )
+    def test_both_ends_of_the_list_are_found(self, text):
+        assert search(text) == ["SHANK3", "MECP2"]
+
+    def test_a_search_link_carrying_a_list(self):
+        link = parse_search_link("['SHANK3','MECP2']", None, ["GRCh38"])
+        assert link is not None
+        assert link.tokens == ("SHANK3", "MECP2")
+
+    @pytest.mark.skipif(shutil.which("node") is None, reason="needs node")
+    def test_the_browser_splits_the_same_way(self):
+        """``splitTokens`` in token_editor.js, run in node, on the same cases."""
+        js = (
+            Path(search_module.__file__).parent.parent / "ui" / "js" / "token_editor.js"
+        )
+        harness = """
+            const vm = require('vm');
+            const fs = require('fs');
+            const window = {_tokenEditorConfig: {}};
+            const document = {readyState: 'complete', getElementById: () => null};
+            vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'),
+                               {window, document, setTimeout, setInterval});
+            const cases = JSON.parse(fs.readFileSync(0, 'utf8'));
+            console.log(JSON.stringify(cases.map(window.splitSearchTokens)));
+        """
+        result = subprocess.run(  # noqa: S603
+            ["node", "-e", harness, str(js)],  # noqa: S607
+            input=json.dumps([text for text, _ in PASTED]),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert json.loads(result.stdout) == [expected for _, expected in PASTED]
 
 
 class TestMissingBooleanColumns:

@@ -9,7 +9,6 @@ mounts NiceGUI at ``/``; see :mod:`genetrek.app`.
 from __future__ import annotations
 
 import io
-import re
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
@@ -35,6 +34,7 @@ from genetrek.models.schemas import (
     GeneResponse,
 )
 from genetrek.services import lookup
+from genetrek.services.search import split_tokens
 
 if TYPE_CHECKING:
     from genetrek.config.loader import AppConfig
@@ -456,7 +456,10 @@ def register_lookup_routes(
     def convert(
         ids: str = Query(
             ...,
-            description="Identifiers, separated by commas, whitespace or newlines.",
+            description=(
+                "Identifiers, separated by commas, whitespace or newlines. "
+                "Brackets and quotes are ignored, so a Python or R list reads."
+            ),
         ),
         from_id_type: str = Query(
             "auto",
@@ -473,7 +476,7 @@ def register_lookup_routes(
         The identifiers travel in the URL, so they reach the access logs. For a
         list that should not -- a visitor's own -- use ``POST /api/convert``.
         """
-        values = [token for token in re.split(r"[,;\s]+", ids) if token]
+        values = split_tokens(ids)
         if not values:
             raise HTTPException(status_code=400, detail="no identifiers given")
         if len(values) > MAX_CONVERT_IDS:
