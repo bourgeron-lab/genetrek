@@ -25,6 +25,18 @@ spec:
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
+          {{- if .Values.goatcounter.enabled }}
+          # The visit counter's count endpoint, and nothing else of it: the
+          # dashboard has its own, network-restricted host. Same origin as the
+          # pages, so the browser's report needs no CORS.
+          - path: {{ .Values.goatcounter.basePath }}/count
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "genetrek.goatcounter.fullname" . }}
+                port:
+                  number: 8080
+          {{- end }}
           - path: /
             pathType: ImplementationSpecific
             backend:

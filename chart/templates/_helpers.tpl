@@ -21,3 +21,22 @@ Deployment, since spec.selector is immutable. */}}
 app.kubernetes.io/name: {{ include "genetrek.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
+
+{{/* The visit counter, beside the application and named after it. */}}
+{{- define "genetrek.goatcounter.fullname" -}}
+{{- printf "%s-goatcounter" (include "genetrek.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "genetrek.goatcounter.labels" -}}
+app.kubernetes.io/name: {{ include "genetrek.goatcounter.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: visit-counter
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
+{{- end -}}
+
+{{/* A name of its own, so the application's Service never selects it. */}}
+{{- define "genetrek.goatcounter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "genetrek.goatcounter.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}

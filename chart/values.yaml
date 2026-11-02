@@ -82,3 +82,38 @@ probes:
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 3
+
+# Visit counting with a self-hosted GoatCounter: page loads, unique visitors and
+# their country, nothing else (src/genetrek/visits.py says exactly what the
+# pages send). Off by default, so a deployment of the public chart counts
+# nothing unless it asks to.
+goatcounter:
+  enabled: false
+  image:
+    # A release, never `latest`: a schema migration (-automigrate) should
+    # happen when someone changes this line, not when the registry moves.
+    repository: docker.io/arp242/goatcounter
+    tag: "2.7.0"
+    pullPolicy: IfNotPresent
+  # Every GoatCounter route lives under this path. The application's host
+  # forwards only <basePath>/count; the pages report there.
+  basePath: /stats
+  storage:
+    # SQLite with daily aggregates; years of a small site's counts fit in tens
+    # of megabytes.
+    size: 1Gi
+    # Empty uses the cluster default. It must be a ReadWriteOnce class.
+    className: ""
+  # The dashboard's own Ingress. Empty host: none, and the dashboard is reached
+  # with kubectl port-forward. Give it a class only your own network can reach.
+  dashboard:
+    className: ""
+    host: ""
+    tlsSecretName: ""
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 250m

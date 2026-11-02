@@ -6,7 +6,8 @@ gene lists are decided.
 Every column, with its description, source and coverage, is listed in the
 [Column reference](/columns). For the HTTP interface see [API
 reference](/api-reference); for what changed and when, [Changelog](/changelog);
-for references, [How to cite](/cite).
+for references, [How to cite](/cite); for what GeneTrek keeps about you and your
+lists, which is very little, [My lists & your data](/my-lists).
 
 ### What is in the table
 
