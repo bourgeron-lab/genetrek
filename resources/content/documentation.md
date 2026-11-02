@@ -313,6 +313,17 @@ browser work with or without thousands separators, and a list copied out of
 Python or R code (`['SHANK3', 'CHD8']`, `c("SHANK3", "CHD8")`) reads as the genes
 it lists.
 
+### Copying a gene list
+
+**Copy genes** puts genes on the clipboard, one per line, ready to paste into a
+spreadsheet, another tool or the search box. It copies the current results in the
+table's order (beside **Save as list**), a gene list from the database (in the
+dialog a column header opens) or one of your lists (the copy icon on its row in
+**My lists**). Symbols are the default; the arrow or the menu copies HGNC,
+Ensembl or NCBI gene ids instead, and says how many genes have none of that kind.
+If the browser does not allow the copy, as Safari sometimes does not, the genes
+open selected in a box for you to copy by hand.
+
 ### Linking to GeneTrek
 
 Other tools can open GeneTrek on a gene or a search:

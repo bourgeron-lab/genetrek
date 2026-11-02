@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any
 
+import polars as pl
 from nicegui import ui
 
 from genetrek.services.column_reference import doi_url, format_date
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from genetrek.config.loader import AppConfig
+    from genetrek.ui.components.copy_genes import GeneCopier
 
 
 #: A bare URL in free-text metadata. The lookbehind is what keeps this from
@@ -177,14 +179,30 @@ def column_info_markdown(
     return "\n\n".join(blocks)
 
 
+def list_members(frame: pl.DataFrame, column: str) -> pl.DataFrame | None:
+    """The genes on a gene list -- a Boolean column's True rows -- or ``None``.
+
+    Null is "not measured", never on the list, so it is left out with False.
+    """
+    if frame.schema.get(column) != pl.Boolean:
+        return None
+    return frame.filter(pl.col(column))
+
+
 def create_column_info_dialog(
     config: AppConfig,
     describe_extra: Callable[[str], tuple[str, str] | None] | None = None,
+    *,
+    copier: GeneCopier | None = None,
+    table: Callable[[], pl.DataFrame] | None = None,
 ) -> tuple[ui.dialog, Callable[[str], None]]:
     """Build the column-info dialog once, and return it with its opener.
 
     ``describe_extra`` answers for columns the metadata does not know -- the
     visitor's own lists -- with a title and markdown, or ``None``.
+
+    With a ``copier``, a gene list (a Boolean column of ``table()``, the tab's
+    table including My lists) gets a button copying its genes.
 
     One dialog is reused for every column: a ``ui.dialog`` is an element that is
     merely hidden on close, so building a fresh one per click would leave an
@@ -194,12 +212,34 @@ def create_column_info_dialog(
     Returns:
         The dialog, and a ``show(column)`` that fills and opens it.
     """
+    shown = {"column": ""}
+
+    def members() -> pl.DataFrame:
+        rows = table() if table else config.df
+        listed = list_members(rows, shown["column"])
+        return listed if listed is not None else rows.clear()
+
     dialog = ui.dialog()
     with dialog, ui.card().style("width: 640px; max-width: 90vw;"):
         title = ui.label().classes("text-lg font-bold").style("color: #1a365d;")
         body = ui.markdown(extras=MARKDOWN_EXTRAS).classes("text-sm")
-        with ui.row().classes("w-full justify-end"):
+        with ui.row().classes("w-full items-center"):
+            copy_button = (
+                copier.results_button(members)
+                if copier is not None and copier.enabled
+                else None
+            )
+            ui.space()
             ui.button("Close", on_click=dialog.close).props("flat")
+
+    def offer_copy(column: str) -> None:
+        shown["column"] = column
+        if copy_button is None:
+            return
+        listed = list_members(table() if table else config.df, column)
+        copy_button.set_visibility(listed is not None and listed.height > 0)
+        if listed is not None:
+            copy_button.set_text(f"Copy {listed.height:,} genes")
 
     def show(column: str) -> None:
         # The column name arrives from the browser, so it is checked rather than
@@ -211,6 +251,7 @@ def create_column_info_dialog(
                 return
             title.set_text(extra[0])
             body.set_content(extra[1])
+            offer_copy(column)
             dialog.open()
             return
         title.set_text(str(meta.get("fullname") or column))
@@ -228,6 +269,7 @@ def create_column_info_dialog(
                 n_rows=frame.height,
             ),
         )
+        offer_copy(column)
         dialog.open()
 
     return dialog, show

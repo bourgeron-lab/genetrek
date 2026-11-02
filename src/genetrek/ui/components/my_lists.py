@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 
     from genetrek.config.loader import AppConfig
     from genetrek.db.gene_index import GeneIndex
+    from genetrek.ui.components.copy_genes import GeneCopier
 
 #: Shown wherever a list is created or brought in. Inline, never a modal that
 #: can be dismissed for good: it is the one fact a user must not miss.
@@ -92,11 +93,13 @@ class MyLists:
         state: dict[str, Any],
         gene_index: GeneIndex | None,
         database_keys: frozenset[str],
+        copier: GeneCopier,
     ) -> None:
         self.config = config
         self.state = state
         self.gene_index = gene_index
         self.database_keys = database_keys
+        self.copier = copier
         #: ``None`` disables the feature: lists are sets of primary keys.
         self.key = config.roles.primary_key
         self.tz = ZoneInfo("UTC")
@@ -884,6 +887,12 @@ class MyLists:
             elif lst.exported is None:
                 ui.badge("not backed up", color="orange-8").props("outline").tooltip(
                     "Never exported: it exists only in this browser.",
+                )
+            if self.copier.enabled:
+                # The list's genes this database has, in its order; a gene the
+                # release no longer has has no identifier to copy.
+                self.copier.icon_button(
+                    lambda: self.state["base_df"].filter(pl.col(lst.column)),
                 )
             for icon, tip, action in (
                 ("edit", "Rename", lambda _, i=lst.id: self._open_rename(i)),

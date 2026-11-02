@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from genetrek.config.loader import AppConfig
+    from genetrek.ui.components.copy_genes import GeneCopier
 
 #: Pinned deliberately. Unpinned, this URL followed the dist-tag to table-core
 #: 9, which replaced ``createTable`` with a ``tableFeatures`` API -- so the table
@@ -39,6 +40,7 @@ class GeneTable:
         self,
         config: AppConfig,
         state: dict[str, Any],
+        copier: GeneCopier,
         on_sort_change: Callable[[list[dict[str, Any]]], None] | None = None,
     ) -> None:
         self.config = config
@@ -61,6 +63,8 @@ class GeneTable:
                 "describe_list_column",
                 lambda _: None,
             )(column),
+            copier=copier,
+            table=lambda: state["base_df"],
         )
         self._gene_dialog, self._show_gene_info = create_gene_info_dialog(config)
 
