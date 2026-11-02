@@ -34,6 +34,17 @@ jobs:
       - uses: azure/setup-helm@v4
       - run: helm lint ./chart --set image.repository=example --set image.tag=test
       - run: helm template genetrek ./chart --set image.repository=example --set image.tag=test
+      # The visit counter is off by default; render it on as well, with its
+      # public count path and the dashboard Ingress, so neither rots unseen.
+      - run: >
+          helm lint ./chart --set image.repository=example --set image.tag=test
+          --set ingress.enabled=true --set ingress.host=g.example.org
+          --set goatcounter.enabled=true --set goatcounter.dashboard.host=s.example.org
+      - run: >
+          helm template genetrek ./chart --set image.repository=example --set image.tag=test
+          --set ingress.enabled=true --set ingress.host=g.example.org
+          --set goatcounter.enabled=true
+          | grep -q 'value: "/stats"'
       # An all-digit short sha arrives from --set as an int64; the image name must
       # still render as repository:digits (it once rendered %!s(int64=...)).
       - run: >

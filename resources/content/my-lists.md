@@ -83,3 +83,20 @@ Lists store stable gene identifiers (HGNC IDs) rather than symbols, so a renamed
 gene stays in your list. If a later release withdraws a gene, the list keeps it
 and says how many of its genes are *not in this database*. An export still
 includes them.
+
+### Counting visits
+
+GeneTrek counts its visits to know how much it is used. The counter,
+[GoatCounter](https://www.goatcounter.com), runs on Institut Pasteur's servers
+beside GeneTrek, so nothing is sent to a third party, and it sets no cookie and
+stores nothing in your browser.
+
+When a page loads, your browser reports **the page's path and nothing else**:
+`/` or `/documentation`, never the search in the address (`?search=…`), anything
+after `#` (`#lists=…`, `#search=…`), or the page you came from. Searches,
+downloads, comparisons, gene details and your lists are not counted or reported.
+
+The counter looks up your **country** from your IP address. To tell one visitor
+from another, it keeps your IP address and your browser's name in memory, never
+on disk, and forgets them 8 hours after your last page. What it stores are
+counts: page loads and visitors per page and per hour, and visitors per country.

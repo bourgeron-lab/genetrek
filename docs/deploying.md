@@ -56,3 +56,40 @@ helm upgrade --install genetrek ./chart -n genetrek -f my-values.yaml \
 
 Pass the tag with `--set-string`: an all-digit commit sha would otherwise become a number.
 The chart's resource requests and limits, probes and environment follow the sizing above.
+
+### Visit counting (optional)
+
+`goatcounter.enabled: true` adds a self-hosted [GoatCounter](https://www.goatcounter.com)
+beside the application: a Deployment (one replica, `Recreate`), a Service, a 1 GiB
+ReadWriteOnce PersistentVolumeClaim for its SQLite database (kept by `helm uninstall`),
+and a `<basePath>/count` path on the application's own Ingress. The pages then report each
+load to it, with the page's path and nothing else (`src/genetrek/visits.py`).
+
+```yaml
+goatcounter:
+  enabled: true
+  image:
+    repository: registry.example.org/mirror/goatcounter   # default: docker.io/arp242/goatcounter
+  dashboard:
+    className: internal        # a class only your own network can reach
+    host: stats.example.internal
+```
+
+Without `dashboard.host` the dashboard has no Ingress; reach it with
+`kubectl port-forward svc/<name>-goatcounter 8080` and `http://localhost:8080/stats/`.
+
+Create the site and its first user before the dashboard is reachable: an instance with no
+site offers a "create the first account" form to whoever opens it first.
+
+```bash
+kubectl exec -it deploy/<name>-goatcounter -- goatcounter db create site \
+  -db sqlite+/home/goatcounter/goatcounter-data/db.sqlite3 \
+  -vhost <your host> -user.email <you>
+```
+
+Then, in the dashboard's site settings under "Collect", keep **Sessions** and **Country**
+and turn the rest off: the pages send no referrer, title or screen size, and with
+"Individual pageviews" off only counts are stored. GoatCounter reads the client address
+from `X-Real-Ip` or `X-Forwarded-For` and ignores private addresses; check that the
+country it records is the visitor's and not your proxy's: logged in, open
+`<basePath>/settings/main/ip`, which shows the address GoatCounter sees for you.

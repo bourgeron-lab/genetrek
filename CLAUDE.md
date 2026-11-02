@@ -40,6 +40,7 @@ src/genetrek/
   services/compare_figures.py – Plotly Venn/UpSet/heatmap, screen and publication styles
   services/compare_export.py – Supplementary tables (TSV/XLSX/ZIP) and the methods text
   backgrounds.py      – Comparison universes and covariates, from config/backgrounds.yaml (optional)
+  visits.py           – Visit counting: the page-load report to GoatCounter ($GENETREK_GOATCOUNTER_URL)
   content.py          – THE prose-page table: ContentPage, CONTENT_PAGES
   ui/page.py          – @ui.page("/") main page composition
   ui/content.py       – One page per CONTENT_PAGES entry, from resources/content/*.md
@@ -133,6 +134,16 @@ src/genetrek/
   (`window.setSearchTokens`). Prefer the fragment for anything patient-derived: it never
   reaches a server. Exact symbol search resolves withdrawn/alias symbols through the gene
   index (`services.lookup.symbol_resolver`), as the list dialogs and `/api/convert` do.
+- **Visit counting sends a page's path and nothing else.** `visits.counter_snippet` is the
+  only thing that reports to the self-hosted GoatCounter, once per page load, from the
+  table page and every prose page; off unless `GENETREK_GOATCOUNTER_URL` is set (the chart
+  derives it when `goatcounter.enabled`). It reads `location.pathname` only -- never
+  `location.search`/`hash` or the referrer, and sends no `Referer` header. GoatCounter's own
+  `count.js` is not used: it always sends the query string and the referrer. Never count
+  searches, downloads, dialogs or API calls (no `goatcounter.count(`, no
+  `data-goatcounter-*`); `tests/test_visits.py` scans `src/` for them. The dashboard is on
+  its own internal-only host; the public host routes only `<basePath>/count`. What visitors
+  are told is in `resources/content/my-lists.md` ("Counting visits"): keep it true.
 - NiceGUI passes the event to any handler that takes a parameter, so `lambda i=x: f(i)`
   receives the event as `i`. Write `lambda _, i=x: f(i)`; a test scans `ui/` for it.
 - The parquet and `fields_description.yaml` are one unit: mutate them via `db.Database`,

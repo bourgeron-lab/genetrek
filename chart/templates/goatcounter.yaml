@@ -1,0 +1,174 @@
+{{- if .Values.goatcounter.enabled }}
+{{- $gc := .Values.goatcounter }}
+{{/*
+Visit counting: a self-hosted GoatCounter that records page loads, sessions and
+countries, and is told nothing but each page's path (src/genetrek/visits.py).
+One pod with SQLite on a ReadWriteOnce volume, so everything below follows from
+there being exactly one writer.
+*/}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "genetrek.goatcounter.fullname" . }}
+  labels: {{- include "genetrek.goatcounter.labels" . | nindent 4 }}
+  annotations:
+    # The counts are the only state this chart owns. `helm uninstall`, or
+    # setting enabled to false, must not take them with it; delete by hand.
+    helm.sh/resource-policy: keep
+spec:
+  # SQLite on a shared filesystem corrupts under concurrent locking; a block
+  # volume attached to one node is what it expects.
+  accessModes: ["ReadWriteOnce"]
+  {{- with $gc.storage.className }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $gc.storage.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "genetrek.goatcounter.fullname" . }}
+  labels: {{- include "genetrek.goatcounter.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    # Not RollingUpdate: the new pod could not attach the ReadWriteOnce volume
+    # while the old one holds it, so a rollout would hang. A few seconds without
+    # counting is the price, and the page loads in it are simply not counted.
+    type: Recreate
+  selector:
+    matchLabels: {{- include "genetrek.goatcounter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "genetrek.goatcounter.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      # GoatCounter reads every GOATCOUNTER_* variable as a flag, and a Service
+      # named "goatcounter" would inject GOATCOUNTER_PORT -- read as -port.
+      enableServiceLinks: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        # The image's `goatcounter` user, which owns the data directory; named
+        # in the image, so runAsNonRoot needs the number spelled out.
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: goatcounter
+          image: {{ printf "%s:%s" $gc.image.repository (toString $gc.image.tag) | quote }}
+          imagePullPolicy: {{ $gc.image.pullPolicy }}
+          args:
+            - serve
+            - -listen=:8080
+            # TLS ends at the ingress.
+            - -tls=http
+            - -automigrate
+            # Every route lives under this path, the public /count included,
+            # so the ingress can forward it unchanged.
+            - -base-path={{ $gc.basePath }}
+            - -db=sqlite+/home/goatcounter/goatcounter-data/db.sqlite3
+            # No -geodb: the built-in database knows countries only, so no
+            # region is ever recorded. GoatCounter would also pick up any .mmdb
+            # file in the data directory; none is ever put there.
+          env:
+            # CSV exports spool here; the root filesystem is read-only.
+            - name: GOATCOUNTER_TMPDIR
+              value: /tmp
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          {{/*
+          TCP rather than HTTP: GoatCounter answers /status at the root path,
+          and under -base-path the 2.7.0 source still matches the unprefixed
+          path only, so an HTTP probe has nothing it can count on.
+          */}}
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+            failureThreshold: 20
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+          resources: {{- toYaml $gc.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /home/goatcounter/goatcounter-data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "genetrek.goatcounter.fullname" . }}
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "genetrek.goatcounter.fullname" . }}
+  labels: {{- include "genetrek.goatcounter.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector: {{- include "genetrek.goatcounter.selectorLabels" . | nindent 4 }}
+{{- with $gc.dashboard.host }}
+---
+{{/*
+The dashboard on a host of its own. The public site exposes only the count
+endpoint (see ingress.yaml), and an instance with no site yet offers a
+"create the first account" form to whoever reaches it first -- so this one
+belongs on a network-restricted class, and the site is created before it is.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "genetrek.goatcounter.fullname" $ }}
+  labels: {{- include "genetrek.goatcounter.labels" $ | nindent 4 }}
+spec:
+  {{- with $gc.dashboard.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with $gc.dashboard.tlsSecretName }}
+  tls:
+    - hosts:
+        - {{ $gc.dashboard.host | quote }}
+      secretName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ $gc.dashboard.host | quote }}
+      http:
+        paths:
+          - path: {{ $gc.basePath }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "genetrek.goatcounter.fullname" $ }}
+                port:
+                  number: 8080
+{{- end }}
+{{- end }}

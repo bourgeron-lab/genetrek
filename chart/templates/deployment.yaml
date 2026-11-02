@@ -56,6 +56,13 @@ spec:
             # request rather than a kubectl describe.
             - name: GENETREK_RELEASE
               value: {{ .Values.image.tag | toString | quote }}
+            {{- if and .Values.goatcounter.enabled .Values.ingress.enabled }}
+            # Derived, not a value of its own: the pages report to the count
+            # path ingress.yaml routes, and the two cannot disagree. Unset, the
+            # pages report nothing.
+            - name: GENETREK_GOATCOUNTER_URL
+              value: {{ .Values.goatcounter.basePath | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
