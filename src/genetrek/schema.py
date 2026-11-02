@@ -61,6 +61,16 @@ ID_TYPE = Literal[
 #: Identifier roles a database may fill, in the order reports list them.
 IDENTIFIER_ROLES: tuple[str, ...] = ("symbol", "ensg", "ncbi", "hgnc", "omim")
 
+#: What a list of each identifier role is called in the interface, written to
+#: sit mid-sentence ("Copy Ensembl ids", "Copied 3 symbols").
+IDENTIFIER_LABELS: dict[str, str] = {
+    "symbol": "symbols",
+    "ensg": "Ensembl ids",
+    "ncbi": "NCBI gene ids",
+    "hgnc": "HGNC ids",
+    "omim": "OMIM ids",
+}
+
 #: Coordinate roles, each needing an ``assembly`` alongside it.
 LOCUS_ROLES: tuple[str, ...] = ("locus_chr", "locus_start", "locus_end", "locus_strand")
 

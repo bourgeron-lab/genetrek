@@ -34,6 +34,9 @@ Because the browser holds the only copy, a list disappears when:
 
 ### Exporting and importing
 
+**Copy genes** (the copy icon on a list's row) puts its genes on the clipboard,
+one per line, as symbols or another identifier. The copy is made in your browser.
+
 **Export** (one list, a selection, or **Export all**) downloads a `.json` file
 that you can read: each gene is listed with its identifier and symbol. **Import
 file** reads it back. It also reads a plain text, TSV or CSV file with one gene

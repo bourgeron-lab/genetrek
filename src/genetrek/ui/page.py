@@ -15,6 +15,7 @@ from genetrek.services.lookup import symbol_resolver
 from genetrek.services.search import parse_search_link
 from genetrek.ui.components.column_selector import create_column_selector
 from genetrek.ui.components.compare_view import CompareView
+from genetrek.ui.components.copy_genes import GeneCopier
 from genetrek.ui.components.gene_table import GeneTable
 from genetrek.ui.components.header import create_header
 from genetrek.ui.components.my_lists import MyLists
@@ -85,9 +86,13 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
             "on_lists_change": [],
         }
 
+        # Every "Copy genes" button copies through this one, so they share the
+        # format and the fallback dialog.
+        copier = GeneCopier(config)
+
         # The visitor's lists. Built before every component that offers them,
         # because it seeds `state["base_df"]` and the list labels they read.
-        my_lists = MyLists(config, state, gene_index, database_keys)
+        my_lists = MyLists(config, state, gene_index, database_keys, copier)
 
         # Sort handler — sorts filtered_df in-place when JS emits sort-change
         def handle_sort(sorting: list[dict[str, Any]]) -> None:
@@ -108,7 +113,7 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
                 )
 
         # Gene table (TanStack)
-        gene_table = GeneTable(config, state, on_sort_change=handle_sort)
+        gene_table = GeneTable(config, state, copier, on_sort_change=handle_sort)
 
         def refresh_table() -> None:
             state["current_page"] = 1
@@ -248,6 +253,9 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
                             )
 
                     with ui.row().classes("items-center gap-2"):
+                        if copier.enabled:
+                            # In the table's order: sorting reorders filtered_df.
+                            copier.results_button(lambda: state["filtered_df"])
                         if my_lists.enabled:
                             ui.button(
                                 "Save as list",
