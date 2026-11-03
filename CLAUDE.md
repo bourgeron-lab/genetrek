@@ -67,8 +67,14 @@ src/genetrek_server/
 
 client/                 – The `genetrek` package (PyPI), a uv workspace member the server depends on
   src/genetrek/
+    client.py         – GeneTrek: one method per endpoint, polars tables, API-version checks
+    config.py         – Which server: base_url > server name > $GENETREK_URL > $GENETREK_SERVER
+                        > config-file default > public instance; the TOML file of named servers
+    cli.py            – The `genetrek` command (Typer): TSV to stdout, --json, `config` subcommands
+    sets.py / models.py / errors.py – Compare sets, Comparison results, code → exception
     lists.py          – My lists: gene-set model, compact codec, share links, export files
     tokens.py         – split_tokens: typed or pasted text (incl. Python/R lists) → tokens
+  tests/              – Client-only tests (respx); they run on the bare wheel on Python 3.10 in CI
 ```
 
 The repository is a **uv workspace**: the root project is `genetrek-server` (import
@@ -138,6 +144,13 @@ server imports it, never the reverse -- the client must install without FastAPI 
   so it holds in the tests' bare apps too) turns it into `{"detail", "code"}`, and the
   `genetrek` client maps each code to an exception. A new code goes in `ERROR_CODES` *and*
   the table in `api-reference.md` (`tests/test_api_v11.py` checks).
+- **The client (`client/`) never names a private host.** Its default is the public instance;
+  any other server is named by the user in their config file (`genetrek config add`). Keep
+  it Python 3.10-compatible and free of server dependencies (CI installs the wheel alone on
+  3.10). A client method that needs a newer API calls `_require((major, minor), ...)`, which
+  raises `ServerTooOld` naming the server; `tests/test_client_contract.py` runs the real client
+  against the real routers, so an API change that breaks it fails in the same PR. Publish by
+  pushing a tag `client-v<version>` matching `client/pyproject.toml` (PyPI trusted publishing).
 - **Gene lists reach the API by POST only** (`/api/compare`, `/api/convert`): bodies are
   not in access logs, URLs are. Nothing is stored. `request.json` in every Compare
   download is the exact `POST /api/compare` body (database lists by field, anything else

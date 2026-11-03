@@ -48,6 +48,7 @@ dev = [
     "mypy>=1.0.0",
     "types-PyYAML>=6.0.0.20240106",
     "pytest>=8.0.0",
+    "respx>=0.23.1",
 ]
 # notebooks/brain_data: polars.read_excel needs fastexcel; nbconvert runs the
 # notebooks headless.

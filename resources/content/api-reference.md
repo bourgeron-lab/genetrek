@@ -9,6 +9,21 @@ A gene is addressed by **any identifier it carries** — an approved symbol, an
 out which is which. Withdrawn and alternative symbols resolve too: `KIAA1650`
 answers as `SHANK3`.
 
+**From Python or the shell**, the `genetrek` package wraps all of this:
+`pip install genetrek`, then
+
+```python
+from genetrek import GeneTrek, Set
+gt = GeneTrek()
+gt.genes(["SHANK3", "CHD8"], columns=["loeuf", "hc_ndd"])   # a polars DataFrame
+gt.compare([Set.field("hc_ndd"), Set.file("my_genes.txt")]).pairs
+```
+
+or `genetrek list hc_ndd`, `genetrek genes my_genes.txt --columns loeuf`, `genetrek
+compare hc_ndd my_genes.txt`. It sends your genes in request bodies only, and says which
+server answered (`genetrek info`). See its [page on PyPI](https://pypi.org/project/genetrek/)
+for the details.
+
 Columns are addressed by name, and a versioned gene list can be addressed by its
 stable short name: `hc_ndd` reaches `hc_ndd_v7`. The response always names the
 real column it used, so a file you download is never ambiguous about which

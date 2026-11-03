@@ -27,6 +27,27 @@ jobs:
       # and DATA_LICENCES.md against every column's licence.
       - run: uv run pytest
 
+  # The `genetrek` client as PyPI ships it: its wheel alone, on the oldest
+  # Python it supports, with none of the server's dependencies installed.
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.9"
+          python-version: "3.10"
+      - run: uv build --package genetrek --out-dir dist
+      - run: uv venv /tmp/client --python 3.10
+      - run: uv pip install --python /tmp/client/bin/python dist/genetrek-*.whl pytest respx
+      - run: /tmp/client/bin/genetrek --help
+      - run: >
+          /tmp/client/bin/python -c "import sys, genetrek;
+          loaded = [m for m in ('fastapi', 'nicegui', 'scipy', 'genetrek_server') if m in sys.modules];
+          assert not loaded, loaded"
+      - run: /tmp/client/bin/python -m pytest -p no:cacheprovider tests
+        working-directory: client
+
   chart:
     runs-on: ubuntu-latest
     steps:
