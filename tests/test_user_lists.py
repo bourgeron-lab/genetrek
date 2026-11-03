@@ -343,9 +343,9 @@ class TestMessageLimits:
         assert ul.IMPORT_CHUNK_CHARS * 3 < ul.MAX_MESSAGE_BYTES
 
     def test_the_browser_uses_the_same_numbers(self):
-        js = (
-            Path(ul.__file__).parent.parent / "ui" / "js" / "my_lists.js"
-        ).read_text(encoding="utf-8")
+        js = (Path(ul.__file__).parent.parent / "ui" / "js" / "my_lists.js").read_text(
+            encoding="utf-8"
+        )
         for name in ("MAX_MESSAGE_BYTES", "MAX_IMPORT_BYTES", "IMPORT_CHUNK_CHARS"):
             assert f"var {name} = {getattr(ul, name)};" in js, name
 
