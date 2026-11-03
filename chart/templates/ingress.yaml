@@ -2,8 +2,10 @@
 {{/*
 Deliberately no annotations: they are controller-specific, and a plain Ingress
 with a host and a path is all the application needs. Websockets need nothing
-either; socket.io falls back to long polling if an upgrade ever fails, which is
-safe at one replica.
+either, as long as the controller passes the upgrade at /_nicegui_ws/ through:
+they must work. If an upgrade fails, socket.io falls back to long polling, and
+that breaks rather than degrades -- NiceGUI's first message is larger than
+engine.io's 1,000,000-byte maxPayload, so the page never loads.
 */}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

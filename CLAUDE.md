@@ -64,7 +64,7 @@ src/genetrek_server/
     sources/          – One module per upstream, all behind a Fetcher protocol:
                         hgnc, gencode, ncbi, coordinates (the cascade), fetcher
     field.py          – Field (metadata only) / BoundField (+ values, write-through)
-    gene_index.py     – Identifier resolution onto ncbi_id, with HGNC aliases
+    gene_index.py     – Identifier resolution onto the primary key (hgnc_id), with HGNC aliases
     storage.py        – Crash-safe writes, backups, history log
   cli/                – `genetrek-db` Typer app (list/show/add/remove/set/resolve/…)
 
