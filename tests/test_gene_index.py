@@ -7,9 +7,9 @@ import dataclasses
 import polars as pl
 import pytest
 
-from genetrek import schema
-from genetrek.db import Database
-from genetrek.db.gene_index import (
+from genetrek_server import schema
+from genetrek_server.db import Database
+from genetrek_server.db.gene_index import (
     GeneIndex,
     GeneIndexError,
     classify_id,

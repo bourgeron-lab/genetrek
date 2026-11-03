@@ -25,9 +25,9 @@ and its database. GeneTrek is for research use only, not for diagnostic use.
 3. Run the application, then open <http://127.0.0.1:8000/> (API reference at `/docs`):
 
    ```bash
-   uv run genetrek                          # 127.0.0.1:8000
-   uv run genetrek --host 0.0.0.0 --port 5000
-   uv run genetrek --reload                 # development, with auto-reload
+   uv run genetrek-server                   # 127.0.0.1:8000
+   uv run genetrek-server --host 0.0.0.0 --port 5000
+   uv run genetrek-server --reload          # development, with auto-reload
    ```
 
 To run it in a container or on Kubernetes, see [docs/deploying.md](docs/deploying.md).
@@ -41,7 +41,8 @@ genetrek/
 │   ├── content/        # site_description.md and one .md per prose page
 │   ├── processed_data/ # genetrek.parquet (the database) and the gene-alias index
 │   └── static/         # companion files served at /data (see below)
-├── src/genetrek/       # The Python package: web app, API, services, genetrek-db
+├── src/genetrek_server/ # The server package: web app, API, services, genetrek-db
+├── client/             # The `genetrek` Python client and command (its own package)
 ├── tests/              # pytest suite
 ├── chart/              # Helm chart
 ├── docs/               # Database maintenance and deployment guides
@@ -74,7 +75,7 @@ Anything that fails to resolve is reported, and `add` refuses rather than silent
 genes. The same functionality is available as a library:
 
 ```python
-from genetrek.db import Database
+from genetrek_server.db import Database
 
 db = Database.open()
 db.list_fields()
@@ -131,9 +132,9 @@ The code is under the [MIT licence](LICENSE), © 2026 Institut Pasteur. The data
 ```bash
 uv sync --group dev            # ruff, mypy, pytest
 uv run pytest
-uv run ruff check src/ tests/
-uv run ruff format src/ tests/
-uv run mypy src/genetrek/
+uv run ruff check src/ tests/ client/
+uv run ruff format src/ tests/ client/
+uv run mypy src/genetrek_server/ client/src/genetrek/
 ```
 
 ## Contact

@@ -8,12 +8,12 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from genetrek import schema
-from genetrek.config.loader import load_config
-from genetrek.db import Database, GeneIndex, GeneIndexError
-from genetrek.schema import FieldMeta, LocusColumns, Roles, resolve_roles
-from genetrek.services.enrichment import compute_enrichment
-from genetrek.services.search import SearchUnavailableError, filter_dataframe
+from genetrek_server import schema
+from genetrek_server.config.loader import load_config
+from genetrek_server.db import Database, GeneIndex, GeneIndexError
+from genetrek_server.schema import FieldMeta, LocusColumns, Roles, resolve_roles
+from genetrek_server.services.enrichment import compute_enrichment
+from genetrek_server.services.search import SearchUnavailableError, filter_dataframe
 
 
 def meta(**kw: object) -> FieldMeta:

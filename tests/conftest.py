@@ -17,10 +17,10 @@ import polars as pl
 import pytest
 import yaml
 
-from genetrek import schema
-from genetrek.cli import _common
-from genetrek.content import CONTENT_PAGES
-from genetrek.schema import FieldMeta
+from genetrek_server import schema
+from genetrek_server.cli import _common
+from genetrek_server.content import CONTENT_PAGES
+from genetrek_server.schema import FieldMeta
 
 if TYPE_CHECKING:
     from pathlib import Path

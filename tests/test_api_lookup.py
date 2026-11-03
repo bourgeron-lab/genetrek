@@ -15,9 +15,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from genetrek.api.routes import create_router
-from genetrek.config.loader import load_config
-from genetrek.paths import ENV_VAR
+from genetrek_server.api.routes import create_router
+from genetrek_server.config.loader import load_config
+from genetrek_server.paths import ENV_VAR
 
 #: What the base fixture makes visible, in display order.
 VISIBLE = ["symbol", "flag_a", "flag_b", "gene_type", "note", "score", "small_count"]

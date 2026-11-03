@@ -13,8 +13,8 @@ from typing import ClassVar
 import polars as pl
 import pytest
 
-from genetrek.schema import LocusColumns, Roles
-from genetrek.ui.components.gene_info_dialog import (
+from genetrek_server.schema import LocusColumns, Roles
+from genetrek_server.ui.components.gene_info_dialog import (
     ensembl_url,
     format_locus,
     gene_links_markdown,

@@ -10,11 +10,11 @@ from __future__ import annotations
 import markdown2
 import pytest
 
-from genetrek.ui.components.column_info_dialog import (
+from genetrek_server.ui.components.column_info_dialog import (
     column_info_markdown,
     column_tooltip,
 )
-from genetrek.ui.markdown import MARKDOWN_EXTRAS
+from genetrek_server.ui.markdown import MARKDOWN_EXTRAS
 
 
 def render(markdown: str) -> str:

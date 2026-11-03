@@ -15,7 +15,7 @@ import random
 import pytest
 from scipy.stats.contingency import odds_ratio
 
-from genetrek.services.odds import conditional_odds_ratio, mantel_haenszel
+from genetrek_server.services.odds import conditional_odds_ratio, mantel_haenszel
 
 
 class TestConditional:

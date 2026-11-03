@@ -5,9 +5,9 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from genetrek.schema import Roles
-from genetrek.services.gene_copy import copy_roles, gene_text
-from genetrek.ui.components.column_info_dialog import list_members
+from genetrek_server.schema import Roles
+from genetrek_server.services.gene_copy import copy_roles, gene_text
+from genetrek_server.ui.components.column_info_dialog import list_members
 
 FRAME = pl.DataFrame(
     {

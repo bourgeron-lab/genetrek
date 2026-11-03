@@ -12,7 +12,7 @@ import math
 
 import pytest
 
-from genetrek.services.compare_layout import (
+from genetrek_server.services.compare_layout import (
     distance_for_overlap,
     fixed_layout,
     lens_area,

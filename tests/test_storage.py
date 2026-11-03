@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from genetrek.db import storage
+from genetrek_server.db import storage
 
 
 class TestWritePair:

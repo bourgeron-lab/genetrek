@@ -16,10 +16,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.testclient import TestClient
 
-from genetrek import media_types
-from genetrek.api.routes import create_compat_router, create_router
-from genetrek.config.loader import load_config
-from genetrek.paths import ENV_VAR
+from genetrek_server import media_types
+from genetrek_server.api.routes import create_compat_router, create_router
+from genetrek_server.config.loader import load_config
+from genetrek_server.paths import ENV_VAR
 
 if TYPE_CHECKING:
     from pathlib import Path

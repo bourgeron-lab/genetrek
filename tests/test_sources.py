@@ -13,9 +13,9 @@ import polars as pl
 import pytest
 from fakes import GENCODE_LISTING, FakeFetcher, gtf, hgnc_body
 
-from genetrek.db.sources import coordinates as co
-from genetrek.db.sources import gencode, hgnc, ncbi
-from genetrek.db.sources.fetcher import Fetcher, FetchError
+from genetrek_server.db.sources import coordinates as co
+from genetrek_server.db.sources import gencode, hgnc, ncbi
+from genetrek_server.db.sources.fetcher import Fetcher, FetchError
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -8,9 +8,9 @@ download paths and every ``df.select`` depend on.
 
 from __future__ import annotations
 
-from genetrek import schema
-from genetrek.config.loader import load_config
-from genetrek.db import Database
+from genetrek_server import schema
+from genetrek_server.config.loader import load_config
+from genetrek_server.db import Database
 
 #: What the synthetic fixture's priorities (symbol 10, flag_a 20, flag_b 30)
 #: plus the alphabetical tail come to.
