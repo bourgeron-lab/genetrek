@@ -54,6 +54,9 @@ src/genetrek_server/
                         my_lists.js -- the only code touching localStorage and #lists=,
                         search_link.js -- reads and strips #search= (a search link),
                         compare.js -- publication figure export, drawn off-screen in the browser)
+  ui/js/vendor/       – TanStack table-core 8.21.3 (UMD, byte-identical, sha256 in its README),
+                        served at /vendor/: the page loads nothing from a third-party host
+  services/pending_downloads.py – Single-use in-memory links for "Download current results"
 
   db/                 – Database maintenance library (no FastAPI/NiceGUI imports)
     database.py       – Database: staged mutation, validation, atomic save
@@ -86,7 +89,8 @@ server imports it, never the reverse -- the client must install without FastAPI 
 
 - Config is loaded once at startup via `load_config()` → immutable `AppConfig` dataclass.
 - NiceGUI page uses a closure-based `state` dict shared across components.
-- The table is rendered client-side by TanStack Table (vanilla JS, `@tanstack/table-core` via CDN).
+- The table is rendered client-side by TanStack Table (vanilla JS, `@tanstack/table-core` 8.x,
+  vendored in `ui/js/vendor/` -- never a CDN; `tests/test_vendor.py` checks).
 - Python sends page data to JS via `ui.run_javascript()`; JS emits events back via NiceGUI bridge.
 - Search filtering is a pure function in `services/search.py` — no UI dependencies.
 - JS files under `ui/js/` are read from disk on **every page request**, by the component that
@@ -159,7 +163,10 @@ server imports it, never the reverse -- the client must install without FastAPI 
   from a `FigureStyle`; `export_style(width_mm)` is the same code at Arial 7 pt / 0.5 pt
   lines / Okabe-Ito, sized in mm at 96 px per inch (PNG `scale = dpi / 96`). The browser
   draws and downloads it (`compare.js`); the server renders no image and writes no file.
-  Tables leave through `ui.download.content` (websocket) for the same reason.
+  Tables leave through `ui.download.content` (websocket) for the same reason -- except
+  "Download current results", which can be the whole table (~25 MB) and stalled the socket:
+  the page puts it in `services/pending_downloads.PENDING` (memory only, single use, 120 s,
+  128 MiB cap) and the browser fetches `/download/results/<token>` over HTTP.
 - **Search links**: `?search=` / `#search=` (+ `genome=`) open the table filtered as if the
   tokens were typed; `services.search.parse_search_link` reads them, the drawer's
   `state["show_search_link"]` runs them and fills the token editor

@@ -20,8 +20,8 @@ Things that matter in production:
   it, so a second worker or replica would answer a reconnect from a process that never saw
   that client. Scaling out would need NiceGUI's Redis storage and session affinity, which are
   not tested.
-- **Memory.** Steady state is about 210 MB resident, but serialising the whole database for a
-  download peaks around 570 MB. Give the container at least 1.5 GiB.
+- **Memory.** Steady state is about 250 MiB; downloads add to it. Measured in a pod: one
+  whole-table TSV peaks at 317 MiB, three at once at 456 MiB. The chart's limit is 768 MiB.
 - **Environment.**
   - `GENETREK_RESOURCES` points at the resources tree (`/app/resources` in the image). Mount
     another tree there to serve different data without rebuilding.

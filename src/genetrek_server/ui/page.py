@@ -12,6 +12,7 @@ import polars as pl
 from nicegui import ui
 
 from genetrek_server import link_preview, visits
+from genetrek_server.services import pending_downloads
 from genetrek_server.services.lookup import symbol_resolver
 from genetrek_server.services.search import parse_search_link
 from genetrek_server.ui.components.column_selector import create_column_selector
@@ -292,24 +293,25 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
                             )
                             today = datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
+                            buffer = io.BytesIO()
                             if fmt == "tsv":
-                                buffer = io.BytesIO()
                                 filtered_df.write_csv(buffer, separator="\t")
-                                content = buffer.getvalue()
-                                ui.download(
-                                    content,
-                                    f"genetrek-data-{today}.tsv",
-                                    "text/tab-separated-values",
-                                )
+                                name = f"genetrek-data-{today}.tsv"
+                                media_type = "text/tab-separated-values"
                             elif fmt == "parquet":
-                                buffer = io.BytesIO()
                                 filtered_df.write_parquet(buffer)
-                                content = buffer.getvalue()
-                                ui.download(
-                                    content,
-                                    f"genetrek-data-{today}.parquet",
-                                    "application/octet-stream",
-                                )
+                                name = f"genetrek-data-{today}.parquet"
+                                media_type = "application/octet-stream"
+                            else:
+                                return
+                            # Over HTTP, not the websocket: a whole-table TSV
+                            # (~25 MB) as one socket.io message can stall the
+                            # connection until it times out. The file stays in
+                            # memory under a single-use link; never on disk.
+                            link = pending_downloads.PENDING.put(
+                                buffer.getvalue(), name, media_type
+                            )
+                            ui.download.from_url(link, name, media_type)
 
                         ui.button(
                             "Download current results",

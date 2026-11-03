@@ -6,9 +6,14 @@ from fastapi.staticfiles import StaticFiles
 from nicegui import ui
 
 from genetrek_server import link_preview, media_types, paths
-from genetrek_server.api.routes import create_compat_router, create_router
+from genetrek_server.api.routes import (
+    create_compat_router,
+    create_downloads_router,
+    create_router,
+)
 from genetrek_server.config.loader import load_config
 from genetrek_server.services.lookup import build_gene_index
+from genetrek_server.ui.components.gene_table import VENDOR_DIR, VENDOR_ROUTE
 from genetrek_server.ui.content import register_content_pages
 from genetrek_server.ui.page import register_main_page
 
@@ -24,6 +29,7 @@ app.include_router(create_router(config, resolver))
 # at "/", and Starlette matches routes in registration order, so anything added
 # afterwards is shadowed by that catch-all and never reached.
 app.include_router(create_compat_router())
+app.include_router(create_downloads_router())
 
 # Must precede the mount below: StaticFiles reads the process-wide mimetypes
 # database when it serves a file, so the registration has to already have run.
@@ -37,6 +43,9 @@ if _static.is_dir():
     app.mount("/data", StaticFiles(directory=_static), name="data")
 else:
     print(f"Warning: no static directory at {_static}; /data will 404")  # noqa: T201
+
+# Browser code the page would otherwise fetch from a CDN (ui/js/vendor/README.md).
+app.mount(VENDOR_ROUTE, StaticFiles(directory=VENDOR_DIR), name="vendor")
 
 
 # HEAD as well: some crawlers check the image before fetching it, and a HEAD
