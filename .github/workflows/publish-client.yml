@@ -1,0 +1,47 @@
+name: Publish the genetrek client
+
+# A tag `client-v0.1.0` publishes client/ as `genetrek` 0.1.0 on PyPI. The tag
+# must match client/pyproject.toml's version, or nothing is uploaded.
+#
+# PyPI trusted publishing: no token is stored anywhere. On pypi.org the project
+# `genetrek` trusts this repository, this workflow file and the `pypi`
+# environment, and GitHub hands the job a short-lived identity for the upload.
+on:
+  push:
+    tags: ["client-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.9"
+          python-version: "3.12"
+      - name: The tag names the version being published
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' client/pyproject.toml)
+          test "client-v${version}" = "${GITHUB_REF_NAME}" \
+            || { echo "tag ${GITHUB_REF_NAME} but client/pyproject.toml says ${version}"; exit 1; }
+      - run: uv build --package genetrek --out-dir dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

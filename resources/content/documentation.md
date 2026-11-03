@@ -4,8 +4,8 @@ How the database is built, what each kind of column means, and how the curated
 gene lists are decided.
 
 Every column, with its description, source and coverage, is listed in the
-[Column reference](/columns). For the HTTP interface see [API
-reference](/api-reference); for what changed and when, [Changelog](/changelog);
+[Column reference](/columns). For the HTTP interface and the `genetrek` Python
+package see [API reference](/api-reference); for what changed and when, [Changelog](/changelog);
 for references, [How to cite](/cite); for what GeneTrek keeps about you and your
 lists, which is very little, [My lists & your data](/my-lists).
 
