@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+  The image chat apps and social sites show when a GeneTrek link is shared
+  (src/genetrek/assets/link-preview.png, served at /link-preview.png).
+
+  1200 x 630, the size every one of them crops to. Shown as a thumbnail, so
+  nothing smaller than ~30 px. Regenerate after editing:
+
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --hide-scrollbars --window-size=1200,630 \
+      --screenshot=src/genetrek/assets/link-preview.png docs/link-preview.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    /* The header's colour (ui/components/header.py). */
+    background: #3c6382;
+    color: #fff;
+    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 96px; box-sizing: border-box;
+  }
+  h1 { font-size: 132px; font-weight: 700; margin: 0; letter-spacing: -2px; }
+  .tagline { font-size: 46px; margin: 12px 0 0; line-height: 1.2; }
+  .rule { width: 160px; height: 6px; background: #e58e26; margin: 48px 0 40px; }
+  .features { font-size: 34px; margin: 0; opacity: 0.88; }
+</style>
+</head>
+<body>
+  <h1>GeneTrek</h1>
+  <p class="tagline">Association of genes with<br>neurodevelopmental disorders</p>
+  <div class="rule"></div>
+  <p class="features">Curated gene lists · Gene annotations · Gene-set comparison</p>
+</body>
+</html>

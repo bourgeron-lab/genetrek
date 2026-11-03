@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 from nicegui import ui
 
-from genetrek import visits
+from genetrek import link_preview, visits
 from genetrek.services.lookup import symbol_resolver
 from genetrek.services.search import parse_search_link
 from genetrek.ui.components.column_selector import create_column_selector
@@ -53,6 +53,7 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
 
     # Read once, at startup: empty unless a deployment names a counter.
     visit_counter = visits.counter_snippet(visits.counter_url())
+    preview = link_preview.preview_tags(link_preview.public_url())
 
     @ui.page("/")
     def main_page(
@@ -75,6 +76,7 @@ def register_main_page(config: AppConfig, gene_index: GeneIndex | None = None) -
             genome: Optional ``?genome=`` -- the assembly loci are read in.
         """
         ui.page_title("GeneTrek")
+        ui.add_head_html(preview)
         if visit_counter:
             ui.add_head_html(visit_counter)
 

@@ -57,6 +57,11 @@ helm upgrade --install genetrek ./chart -n genetrek -f my-values.yaml \
 Pass the tag with `--set-string`: an all-digit commit sha would otherwise become a number.
 The chart's resource requests and limits, probes and environment follow the sizing above.
 
+With an Ingress host, the chart also sets `GENETREK_PUBLIC_URL=https://<host>`. Link
+previews (the card Slack, Teams, LinkedIn or X draw for a pasted link) need the absolute
+address of the page and of its image, `/link-preview.png`; without it the pages carry a
+title and description only. Outside the chart, set it yourself to the address visitors use.
+
 ### Visit counting (optional)
 
 `goatcounter.enabled: true` adds a self-hosted [GoatCounter](https://www.goatcounter.com)

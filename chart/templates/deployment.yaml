@@ -63,6 +63,13 @@ spec:
             - name: GENETREK_GOATCOUNTER_URL
               value: {{ .Values.goatcounter.basePath | quote }}
             {{- end }}
+            {{- if and .Values.ingress.enabled .Values.ingress.host }}
+            # Derived from the host the Ingress serves: link previews need the
+            # absolute address of the page and of its image. Unset, the pages
+            # carry a title and description only.
+            - name: GENETREK_PUBLIC_URL
+              value: {{ printf "https://%s" .Values.ingress.host | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
