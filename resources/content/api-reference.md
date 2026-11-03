@@ -105,6 +105,20 @@ explicitly also reaches the ones the table does not show, which is how measures
 like `moeuf` and `soeuf` are retrieved. The [Column reference](/columns) marks
 those columns "API only".
 
+**Many genes at once.** `POST /api/genes` takes a list of identifiers in the body
+(up to 50,000, any mix of types) and returns one row per gene, in the order you sent
+them, with the identifiers and the columns you name:
+
+```
+POST /api/genes
+{"ids": ["SHANK3", "KIAA1650", "85358", "NOPE"], "columns": ["loeuf", "hc_ndd"]}
+```
+
+`from` and `include_hidden` work as above; without `columns` you get every column
+the table can show. A gene named twice — `SHANK3` and its NCBI id, say — comes back
+once, under the first input. Inputs that name no gene are listed in `not_found`, and
+ones that name several in `ambiguous`, rather than being dropped silently.
+
 Which gene lists a gene is on:
 
 ```
@@ -116,6 +130,33 @@ to expect. Versions of a list coexist, so a gene on the current high-confidence
 NDD list is usually on the previous ones too — the entry carrying an alias is the
 current one. And some columns are roll-ups of others; those report what they were
 combined from in `derived_from`.
+
+### Searching as the table does
+
+```
+POST /api/search
+{"tokens": ["SHANK3", "chr22:50674408-50733212", "NOPE"], "genome": "GRCh38"}
+{"text": "['SHANK3', 'CHD8']"}
+{"filters": ["hc_ndd"], "tokens": ["SHANK3", "CHD8"], "merge": "intersection"}
+```
+
+The search box over HTTP: genes by any identifier, loci in either assembly, and
+the annotation filter, combined the way the search drawer combines them. It runs
+the same code, so it returns the same genes.
+
+- `tokens` is a list; `text` is cut as the search box cuts it, so a pasted list
+  (with commas, brackets or quotes) reads as its genes. Send one or the other.
+- `genome` is the assembly loci are read in; it defaults to the table's.
+- `exact` (default true) matches symbols exactly, and through their aliases;
+  false matches symbols as prefixes.
+- `filters` are gene lists (yes/no columns) and `filter_mode` combines several of
+  them (`union` or `intersection`); `merge` combines the tokens' genes with the
+  filters' genes (`union` or `intersection`).
+- `columns`, `limit` and `offset` choose what comes back and which page of it.
+
+`total` counts every match before paging, and `unmatched` lists the tokens that
+found nothing on their own. A `POST` because a search can be a patient's genes:
+the body is not written to access logs.
 
 ### Converting identifiers
 
@@ -278,3 +319,34 @@ GET /api/download/database?file_format=parquet
 ```
 
 The whole table, every column, serialised on request.
+
+### Versions and errors
+
+`GET /api/health` reports the server's `api_version`, and every `/api` response
+carries it in an `X-GeneTrek-API-Version` header. A minor version adds endpoints,
+fields or error codes and breaks nothing; a major version would break existing
+callers. This page describes version 1.1, which added `POST /api/genes`, `POST
+/api/search`, error codes and `database_release` (the database's release stamp,
+beside `release`, the build).
+
+Every error is `{"detail": ..., "code": ...}`. `detail` is a message for people and
+may change; `code` is for programs and does not. A 422 for a malformed request keeps
+FastAPI's list of problems in `detail`.
+
+| Code | Meaning |
+|------|---------|
+| `unknown_field` | No column has this name or alias. |
+| `not_a_gene_list` | The column is not a gene list (a Boolean column). |
+| `unknown_gene` | No gene matches the identifier. |
+| `ambiguous_gene` | The identifier matches several genes. |
+| `unknown_id_type` | The identifier type is not one this database carries. |
+| `no_identifiers` | The request named no identifiers. |
+| `too_many_ids` | More identifiers than one request accepts. |
+| `no_columns` | None of the requested columns exists. |
+| `unknown_format` | The download format is not offered. |
+| `unknown_genome` | The genome assembly is not one this database carries. |
+| `unknown_background` | No comparison background has this name. |
+| `unknown_covariate` | No covariate has this name. |
+| `invalid_set` | A comparison set cannot be read (see detail). |
+| `invalid_request` | The request body or parameters are malformed. |
+| `unavailable` | The server cannot do this now (see detail). |

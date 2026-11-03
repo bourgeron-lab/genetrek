@@ -63,7 +63,14 @@ class TestHealth:
     def test_returns_only_scalars(self, client):
         """No row data: probes run every few seconds for the pod's lifetime."""
         body = client.get("/api/health").json()
-        assert set(body) == {"status", "rows", "columns", "release"}
+        assert set(body) == {
+            "status",
+            "rows",
+            "columns",
+            "release",
+            "database_release",
+            "api_version",
+        }
         assert all(isinstance(v, (str, int)) for v in body.values())
 
 

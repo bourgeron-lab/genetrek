@@ -15,7 +15,7 @@ code stable across databases:
 
 from __future__ import annotations
 
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -206,6 +206,100 @@ class ConvertRequest(BaseModel):
     ids: list[str] = Field(min_length=1, max_length=MAX_LIST_IDS)
     from_id_type: str = Field("auto", alias="from")
     to: list[str] | None = None
+
+
+class GenesRequest(BaseModel):
+    """``POST /api/genes``: many genes at once, with the columns to return."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    ids: list[str] = Field(min_length=1, max_length=MAX_LIST_IDS)
+    from_id_type: str = Field("auto", alias="from")
+    #: Columns to return, by name or alias; hidden columns are reachable by
+    #: name. Unset, every visible column (or every column with include_hidden).
+    columns: list[str] | None = None
+    include_hidden: bool = False
+
+
+class GeneRow(BaseModel):
+    """One gene of ``POST /api/genes``, with the input that found it."""
+
+    input: str
+    matched_by: str
+    note: str
+    key: str
+    identifiers: dict[str, Any]
+    values: dict[str, Any]
+
+
+class GenesResponse(BaseModel):
+    requested_id_type: str
+    id_type: str
+    detected: bool
+    n_input: int
+    #: Distinct genes found; an input repeated, or two inputs naming one gene,
+    #: return that gene once, under the first input.
+    n_found: int
+    key_column: str
+    id_columns: dict[str, str]
+    #: The value columns, in the table's display order.
+    columns: list[str]
+    symbol_coverage: str
+    warnings: list[str]
+    not_found: list[str]
+    ambiguous: list[str]
+    genes: list[GeneRow]
+
+
+#: Most tokens one ``POST /api/search`` takes. Each token is checked on its own
+#: to report the ones that found nothing, which is the cost this bounds.
+MAX_SEARCH_TOKENS = 5_000
+
+
+class SearchRequest(BaseModel):
+    """``POST /api/search``: the table's search, over HTTP.
+
+    Exactly one of ``tokens`` and ``text``. ``text`` is cut as the search box
+    cuts it, so a Python or R list pasted whole reads as its genes.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    tokens: list[str] | None = Field(None, max_length=MAX_SEARCH_TOKENS)
+    text: str | None = Field(None, max_length=1_000_000)
+    #: The assembly loci are read in; unset, the table's default.
+    genome: str | None = None
+    #: Symbols match exactly (and through aliases) rather than as prefixes.
+    exact: bool = True
+    #: Boolean columns to filter on, as the drawer's annotation filter.
+    filters: list[str] = Field(default_factory=list)
+    #: How several filters combine.
+    filter_mode: Literal["union", "intersection"] = "union"
+    #: How the tokens' genes and the filters' genes combine.
+    merge: Literal["union", "intersection"] = "union"
+    #: Columns to return besides the identifiers; unset, the visible ones.
+    columns: list[str] | None = None
+    limit: int | None = Field(None, ge=1)
+    offset: int = Field(0, ge=0)
+
+    @model_validator(mode="after")
+    def _one_source(self) -> Self:
+        if self.tokens is not None and self.text is not None:
+            msg = "give tokens or text, not both"
+            raise ValueError(msg)
+        return self
+
+
+class SearchResponse(BaseModel):
+    genome: str | None
+    #: Matching genes before ``limit``/``offset``.
+    total: int
+    #: Tokens that find no gene on their own.
+    unmatched: list[str]
+    key_column: str
+    id_columns: dict[str, str]
+    columns: list[str]
+    rows: list[dict[str, Any]]
 
 
 class CompareSet(BaseModel):
