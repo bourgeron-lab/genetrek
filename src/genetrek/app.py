@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from nicegui import ui
 
-from genetrek import media_types, paths
+from genetrek import link_preview, media_types, paths
 from genetrek.api.routes import create_compat_router, create_router
 from genetrek.config.loader import load_config
 from genetrek.services.lookup import build_gene_index
@@ -36,6 +37,21 @@ if _static.is_dir():
     app.mount("/data", StaticFiles(directory=_static), name="data")
 else:
     print(f"Warning: no static directory at {_static}; /data will 404")  # noqa: T201
+
+
+# HEAD as well: some crawlers check the image before fetching it, and a HEAD
+# that `@app.get` does not answer falls through to NiceGUI's 404.
+@app.api_route(
+    link_preview.IMAGE_ROUTE, methods=["GET", "HEAD"], include_in_schema=False
+)
+def link_preview_image() -> FileResponse:
+    """The image a shared link's preview card shows (``og:image``)."""
+    return FileResponse(
+        link_preview.IMAGE,
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
 
 register_main_page(config, resolver[0])
 register_content_pages(config)

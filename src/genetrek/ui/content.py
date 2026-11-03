@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 from nicegui import ui
 
-from genetrek import visits
+from genetrek import link_preview, visits
 from genetrek.content import CONTENT_PAGES
 from genetrek.services.column_reference import (
     column_reference_rows,
@@ -243,7 +243,12 @@ _COMPUTED_SECTIONS: dict[str, Callable[[AppConfig], None]] = {
 }
 
 
-def _register(config: AppConfig, page: ContentPage, visit_counter: str) -> None:
+def _register(
+    config: AppConfig,
+    page: ContentPage,
+    visit_counter: str,
+    base_url: str | None,
+) -> None:
     """Register one prose page.
 
     A function rather than a loop body, and this is not stylistic:
@@ -253,9 +258,14 @@ def _register(config: AppConfig, page: ContentPage, visit_counter: str) -> None:
     last page.
     """
 
+    preview = link_preview.preview_tags(
+        base_url, route=page.route, title=f"GeneTrek — {page.title}"
+    )
+
     @ui.page(page.route)
     def content_page() -> None:
         ui.page_title(f"GeneTrek — {page.title}")
+        ui.add_head_html(preview)
         if visit_counter:
             ui.add_head_html(visit_counter)
 
@@ -283,5 +293,6 @@ def register_content_pages(config: AppConfig) -> None:
     """Register every declared prose page with NiceGUI."""
     # Read once, at startup: empty unless a deployment names a counter.
     visit_counter = visits.counter_snippet(visits.counter_url())
+    base_url = link_preview.public_url()
     for page in CONTENT_PAGES:
-        _register(config, page, visit_counter)
+        _register(config, page, visit_counter, base_url)

@@ -41,6 +41,7 @@ src/genetrek/
   services/compare_export.py – Supplementary tables (TSV/XLSX/ZIP) and the methods text
   backgrounds.py      – Comparison universes and covariates, from config/backgrounds.yaml (optional)
   visits.py           – Visit counting: the page-load report to GoatCounter ($GENETREK_GOATCOUNTER_URL)
+  link_preview.py     – og:/twitter: tags and the preview image (assets/, from docs/link-preview.html)
   content.py          – THE prose-page table: ContentPage, CONTENT_PAGES
   ui/page.py          – @ui.page("/") main page composition
   ui/content.py       – One page per CONTENT_PAGES entry, from resources/content/*.md
@@ -144,6 +145,12 @@ src/genetrek/
   `data-goatcounter-*`); `tests/test_visits.py` scans `src/` for them. The dashboard is on
   its own internal-only host; the public host routes only `<basePath>/count`. What visitors
   are told is in `resources/content/my-lists.md` ("Counting visits"): keep it true.
+- **Link previews are fixed text, built at startup.** `link_preview.preview_tags` writes
+  the `og:`/`twitter:` tags from the page's *route* and `GENETREK_PUBLIC_URL` (the chart
+  derives it from the Ingress host; unset, no URL or image is emitted, since previews
+  ignore relative ones). Never build them from the request: a bot fetching a shared
+  `?search=` link must not find the genes echoed in the HTML. The image is
+  `assets/link-preview.png`, drawn from `docs/link-preview.html` -- regenerate, don't edit.
 - NiceGUI passes the event to any handler that takes a parameter, so `lambda i=x: f(i)`
   receives the event as `i`. Write `lambda _, i=x: f(i)`; a test scans `ui/` for it.
 - The parquet and `fields_description.yaml` are one unit: mutate them via `db.Database`,
