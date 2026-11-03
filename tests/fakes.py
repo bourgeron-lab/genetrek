@@ -11,8 +11,8 @@ import gzip
 import io
 from typing import TYPE_CHECKING, Self
 
-from genetrek.db.sources import gencode, hgnc, ncbi
-from genetrek.db.sources.fetcher import FetchError
+from genetrek_server.db.sources import gencode, hgnc, ncbi
+from genetrek_server.db.sources.fetcher import FetchError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -21,7 +21,7 @@ GENCODE_LISTING = "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/"
 
 
 class FakeFetcher:
-    """A :class:`~genetrek.db.sources.fetcher.Fetcher` serving canned bodies.
+    """A :class:`~genetrek_server.db.sources.fetcher.Fetcher` serving canned bodies.
 
     Records every call, so a test can assert that a cache was reused or that a
     fallback was never reached.

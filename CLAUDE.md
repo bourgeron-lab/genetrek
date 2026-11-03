@@ -1,23 +1,23 @@
 # GeneTrek
 
-Genomic data viewer: FastAPI backend + NiceGUI frontend. Data comes from a Polars DataFrame loaded from `resources/processed_data/genetrek.parquet`. Column visibility, badges, and external links are config-driven via YAML files in `resources/config/`.
+Genomic data viewer: FastAPI backend + NiceGUI frontend (the `genetrek-server` package, `src/genetrek_server/`), plus the `genetrek` Python client and command (`client/`, published on PyPI). Data comes from a Polars DataFrame loaded from `resources/processed_data/genetrek.parquet`. Column visibility, badges, and external links are config-driven via YAML files in `resources/config/`.
 
 ## Running
 
 ```bash
-uv run genetrek                     # start at http://127.0.0.1:8000
-uv run genetrek --reload            # dev mode with hot reload
-uv run genetrek-db --help           # maintain the parquet/YAML database
-uv run genetrek-db init --dry-run   # build a database from HGNC + GENCODE, plan only
-uv run genetrek-db validate         # validate YAML/parquet alignment
-uv run genetrek-validate-fields     # same checks, legacy entry point
-uv run pytest                       # test suite
+uv run genetrek-server             # start at http://127.0.0.1:8000
+uv run genetrek-server --reload    # dev mode with hot reload
+uv run genetrek-db --help          # maintain the parquet/YAML database
+uv run genetrek-db init --dry-run  # build a database from HGNC + GENCODE, plan only
+uv run genetrek-db validate        # validate YAML/parquet alignment
+uv run genetrek-validate-fields    # same checks, legacy entry point
+uv run pytest                      # test suite
 ```
 
 ## Architecture
 
 ```
-src/genetrek/
+src/genetrek_server/
   paths.py            – Resolves resources/ (arg > $GENETREK_RESOURCES > upward search)
   schema.py           – THE field-metadata contract: FieldMeta, value types, YAML I/O
   app.py              – FastAPI app factory, NiceGUI registration
@@ -32,7 +32,8 @@ src/genetrek/
   services/lookup.py  – Field/gene lookups shared by the API and the UI dialogs
   services/versions.py – Compares coexisting versions of a gene list (the changelog table)
   services/column_reference.py – Every column's metadata + counts (the /columns page, its TSV)
-  services/user_lists.py – My lists: gene-set model, compact codec, share links, export files
+  services/user_lists.py – My lists on the site: browser limits, labels, table columns; re-exports
+                        the model and codec from `genetrek.lists`
   services/compare.py – Gene-set comparison: background restriction, pairwise Fisher/BH, LOEUF
                         strata (CMH), regions
   services/odds.py    – Conditional exact OR/CI (= R fisher.test) and Mantel-Haenszel/CMH
@@ -63,7 +64,17 @@ src/genetrek/
     gene_index.py     – Identifier resolution onto ncbi_id, with HGNC aliases
     storage.py        – Crash-safe writes, backups, history log
   cli/                – `genetrek-db` Typer app (list/show/add/remove/set/resolve/…)
+
+client/                 – The `genetrek` package (PyPI), a uv workspace member the server depends on
+  src/genetrek/
+    lists.py          – My lists: gene-set model, compact codec, share links, export files
+    tokens.py         – split_tokens: typed or pasted text (incl. Python/R lists) → tokens
 ```
+
+The repository is a **uv workspace**: the root project is `genetrek-server` (import
+`genetrek_server`, commands `genetrek-server`, `genetrek-db`), `client/` is `genetrek` (import
+`genetrek`, Python ≥ 3.10, light dependencies). Code both need lives in the client and the
+server imports it, never the reverse -- the client must install without FastAPI or NiceGUI.
 
 ## Key Patterns
 
@@ -159,8 +170,8 @@ src/genetrek/
 ## Development
 
 - **Package manager**: uv (`uv sync` / `uv sync --group dev`)
-- **Linting**: `uv run ruff check src/ tests/` / `uv run ruff format src/ tests/`
-- **Type checking**: `uv run mypy src/genetrek/`
+- **Linting**: `uv run ruff check src/ tests/ client/` / `uv run ruff format src/ tests/ client/`
+- **Type checking**: `uv run mypy src/genetrek_server/ client/src/genetrek/`
 - **Tests**: `uv run pytest` (fixtures build a synthetic resources tree in `tmp_path`;
   `tests/test_real_database.py` guards invariants on the checked-in data)
 - **Python**: 3.12+
@@ -182,7 +193,7 @@ src/genetrek/
   has that copy. Write v8's notebooks to be publishable: no committed outputs, no local
   paths or e-mail addresses, no reads of files that cannot be published.
 - **Worked example of build + annotate**: `notebooks/create_20260903.ipynb` — builds the
-  backbone with `genetrek.db.build`, then adds 45 annotation columns from an annotated HGNC
+  backbone with `genetrek_server.db.build`, then adds 45 annotation columns from an annotated HGNC
   complete set into `resources/processed_data/staging/resources_20260903/`. Resolution is by
   `hgnc_id`, never symbol (175 genes changed symbol between the two releases). Its markdown
   cells record which source columns were rejected and why. Three tables drive everything
@@ -285,7 +296,7 @@ src/genetrek/
   `/api/convert` resolves identifiers. `/docs` is the generated reference;
   `resources/content/api-reference.md` is the prose one, served at `/api-reference`. Endpoints are named after roles,
   never after columns — nothing here belongs in `CODE_DEPENDENT_COLUMNS`.
-- **Add a prose page**: one `ContentPage` entry in `src/genetrek/content.py` and one
+- **Add a prose page**: one `ContentPage` entry in `src/genetrek_server/content.py` and one
   `resources/content/<slug>.md`. Nothing else: the loader reads every declared slug, the
   registrar builds a page per entry, the header menu is built from the same tuple, and
   `genetrek-db init` carries the whole `content/` directory. A declared page with no file
@@ -303,7 +314,7 @@ src/genetrek/
   (a regex mistakes `inheritance_panelapp_20260617`, which is Categorical, for a gene-list
   version and raises). Two of the five hand-written numeric claims in
   `fields_description.yaml` have already drifted, which is why.
-- **Change My lists**: storage format, codec and file format are in `services/user_lists.py`
+- **Change My lists**: storage format, codec and file format are in `client/src/genetrek/lists.py`
   (bump `FORMAT` only for a change an older reader would misread -- it refuses newer
   formats rather than guessing); dialogs in `ui/components/my_lists.py`; the privacy promise
   users read is `resources/content/my-lists.md`, so keep it true when behaviour changes.

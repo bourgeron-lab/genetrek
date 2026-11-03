@@ -17,12 +17,12 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 
-from genetrek.config.loader import load_config
-from genetrek.db.gene_index import GeneIndex
-from genetrek.schema import LocusColumns, Roles
-from genetrek.services import search as search_module
-from genetrek.services.lookup import symbol_resolver
-from genetrek.services.search import (
+from genetrek_server.config.loader import load_config
+from genetrek_server.db.gene_index import GeneIndex
+from genetrek_server.schema import LocusColumns, Roles
+from genetrek_server.services import search as search_module
+from genetrek_server.services.lookup import symbol_resolver
+from genetrek_server.services.search import (
     MAX_LINK_TOKENS,
     filter_dataframe,
     link_note,

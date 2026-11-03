@@ -12,10 +12,10 @@ from pathlib import Path
 
 import pytest
 
-import genetrek
-from genetrek import link_preview
+import genetrek_server
+from genetrek_server import link_preview
 
-SRC = Path(genetrek.__file__).parent
+SRC = Path(genetrek_server.__file__).parent
 
 BASE = "https://genetrek.example.org"
 

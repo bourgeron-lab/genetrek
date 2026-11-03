@@ -1,5 +1,6 @@
 # Keep the build context to what the image needs: pyproject.toml, uv.lock,
-# README.md, .gitignore, src/ and the runtime slice of resources/.
+# README.md, .gitignore, src/, client/ (the server depends on it) and the runtime
+# slice of resources/.
 
 # Version control, editors, OS cruft. .gitignore is deliberately NOT excluded --
 # hatchling reads it when selecting wheel contents.
@@ -28,6 +29,7 @@ dist
 
 # Not needed to run the application.
 tests
+client/tests
 notebooks
 docs
 chart

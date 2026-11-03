@@ -14,11 +14,11 @@ import pytest
 import yaml
 from fakes import HGNC_ROWS, FakeFetcher, full_fetcher, gtf, hgnc_body
 
-from genetrek import paths, schema
-from genetrek.content import CONTENT_PAGES
-from genetrek.db import Database
-from genetrek.db import build as build_module
-from genetrek.db.build import (
+from genetrek_server import paths, schema
+from genetrek_server.content import CONTENT_PAGES
+from genetrek_server.db import Database
+from genetrek_server.db import build as build_module
+from genetrek_server.db.build import (
     PRIMARY_KEY,
     BuildError,
     BuildSpec,
@@ -27,7 +27,7 @@ from genetrek.db.build import (
     plan_build,
     write_ui_config,
 )
-from genetrek.db.sources import hgnc
+from genetrek_server.db.sources import hgnc
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -438,8 +438,8 @@ class TestUiConfig:
 
 def test_a_built_database_is_searchable_end_to_end(tmp_path, spec):
     """The whole point of the role layer: search works without a code change."""
-    from genetrek.config.loader import load_config  # noqa: PLC0415
-    from genetrek.services.search import filter_dataframe  # noqa: PLC0415
+    from genetrek_server.config.loader import load_config  # noqa: PLC0415
+    from genetrek_server.services.search import filter_dataframe  # noqa: PLC0415
 
     result = build(full_fetcher(), tmp_path, spec)
     root = paths.make_tree(tmp_path / "resources")
@@ -480,7 +480,7 @@ def test_build_reports_a_cross_assembly_chromosome_disagreement(tmp_path, spec):
     """Real data has 16 of these; they must be surfaced, not absorbed."""
     from fakes import GENCODE_GENES  # noqa: PLC0415
 
-    from genetrek.db.sources import gencode  # noqa: PLC0415
+    from genetrek_server.db.sources import gencode  # noqa: PLC0415
 
     fetcher = full_fetcher()
 

@@ -1,6 +1,6 @@
 """The prose pages: the table, the files behind it, and the registration.
 
-Adding a page is one entry in `genetrek.content` plus a markdown file, and the
+Adding a page is one entry in `genetrek_server.content` plus a markdown file, and the
 failure mode of forgetting the file is that the application will not start. So
 these check the declaration against the checked-in tree, and pin the one
 non-obvious mechanic in the registrar.
@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-from genetrek import paths
-from genetrek.config.loader import load_config
-from genetrek.content import CONTENT_PAGES
-from genetrek.ui import content as content_module
+from genetrek_server import paths
+from genetrek_server.config.loader import load_config
+from genetrek_server.content import CONTENT_PAGES
+from genetrek_server.ui import content as content_module
 
 
 class TestTheDeclaration:

@@ -28,8 +28,11 @@ WORKDIR /app
 
 # Dependencies first, so an application-only commit does not re-resolve and
 # re-download ~450 MB of wheels.
+# client/pyproject.toml too: the repository is a uv workspace, and uv reads every
+# member's metadata to resolve. --no-install-workspace leaves both packages out.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+COPY client/pyproject.toml ./client/
+RUN uv sync --frozen --no-dev --no-install-workspace
 
 # README.md is required: pyproject sets `readme = "README.md"` and hatchling
 # reads it at build time. .gitignore matters too -- hatchling applies VCS ignore
@@ -37,6 +40,10 @@ RUN uv sync --frozen --no-dev --no-install-project
 # here identical to one built locally.
 COPY README.md .gitignore ./
 COPY src/ ./src/
+# The server imports the code it shares with the Python client (the My lists
+# codec, token splitting) from the client package, `genetrek`.
+COPY client/README.md client/LICENSE ./client/
+COPY client/src/ ./client/src/
 # --no-editable so site-packages holds a real copy and nothing at runtime
 # depends on /app/src still being present.
 RUN uv sync --frozen --no-dev --no-editable
@@ -97,7 +104,7 @@ USER 1000:1000
 
 EXPOSE 8000
 
-# uvicorn directly rather than the `genetrek` console script: web.py's argparse
+# uvicorn directly rather than the `genetrek-server` console script: web.py's argparse
 # exposes only --host/--port and defaults to 127.0.0.1, which is unreachable
 # from a Service.
 #
@@ -109,7 +116,7 @@ EXPOSE 8000
 # --forwarded-allow-ips '*' trusts any peer's X-Forwarded-* headers, which is
 # acceptable only because the Service is ClusterIP: nothing but the ingress
 # controller can reach this port.
-CMD ["uvicorn", "genetrek.web:app", \
+CMD ["uvicorn", "genetrek_server.web:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
      "--workers", "1", \

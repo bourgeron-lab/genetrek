@@ -16,7 +16,7 @@ import pytest
 from scipy import stats
 from scipy.stats.contingency import odds_ratio
 
-from genetrek.backgrounds import (
+from genetrek_server.backgrounds import (
     EVERY_GENE,
     Background,
     load_backgrounds,
@@ -24,11 +24,11 @@ from genetrek.backgrounds import (
     parse_backgrounds,
     parse_covariates,
 )
-from genetrek.config.loader import load_config
-from genetrek.db.database import Database
-from genetrek.schema import FieldMeta, Roles
-from genetrek.services import compare as cmp
-from genetrek.services.enrichment import compute_enrichment, fisher_2x2
+from genetrek_server.config.loader import load_config
+from genetrek_server.db.database import Database
+from genetrek_server.schema import FieldMeta, Roles
+from genetrek_server.services import compare as cmp
+from genetrek_server.services.enrichment import compute_enrichment, fisher_2x2
 
 UNIVERSE = frozenset(str(i) for i in range(100))
 

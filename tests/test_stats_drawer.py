@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from genetrek.ui.components.stats_drawer import _DRAW_DELAY, _DeferredPlot
+from genetrek_server.ui.components.stats_drawer import _DRAW_DELAY, _DeferredPlot
 
 if TYPE_CHECKING:
     from collections.abc import Callable

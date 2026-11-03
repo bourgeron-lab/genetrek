@@ -18,12 +18,13 @@ from zoneinfo import ZoneInfo
 import polars as pl
 import pytest
 from engineio.base_server import BaseServer
+from genetrek import lists as codec
 
-from genetrek.db.database import Database
-from genetrek.db.gene_index import GeneIndex
-from genetrek.schema import Roles, is_valid_field_name
-from genetrek.services import user_lists as ul
-from genetrek.services.search import filter_dataframe
+from genetrek_server.db.database import Database
+from genetrek_server.db.gene_index import GeneIndex
+from genetrek_server.schema import Roles, is_valid_field_name
+from genetrek_server.services import user_lists as ul
+from genetrek_server.services.search import filter_dataframe
 
 NOW = datetime(2026, 10, 3, 14, 32, 5, tzinfo=ZoneInfo("Europe/Paris"))
 HGNC = [f"HGNC:{n}" for n in (5, 37133, 24086, 10, 59305)]
@@ -65,7 +66,7 @@ class TestGeneCodec:
 
     def test_integer_keys_pack_smaller_than_text(self):
         genes = [f"HGNC:{n}" for n in range(1, 30_000, 7)]
-        text = ul._b64encode(ul._deflate("\n".join(genes).encode()))
+        text = codec._b64encode(codec._deflate("\n".join(genes).encode()))
         assert len(ul.encode_genes(genes)) < len(text) / 2
 
     @pytest.mark.parametrize("token", ["", "!!!", "AAAA", "not base64 at all"])
@@ -79,7 +80,9 @@ class TestGeneCodec:
             ul.decode_genes(token[: len(token) // 2])
 
     def test_an_inflation_bomb_is_refused(self):
-        bomb = ul._b64encode(ul._deflate(b"\x01" + b"a" * (ul._MAX_INFLATED + 10)))
+        bomb = codec._b64encode(
+            codec._deflate(b"\x01" + b"a" * (codec._MAX_INFLATED + 10))
+        )
         with pytest.raises(ul.UserListError, match="too large"):
             ul.decode_genes(bomb)
 
@@ -178,16 +181,18 @@ class TestShare:
 
     def test_a_newer_format_is_refused(self):
         body = bytearray(
-            ul._inflate(ul._b64decode(ul.encode_share([], release="r", key="k")))
+            codec._inflate(codec._b64decode(ul.encode_share([], release="r", key="k")))
         )
         body[0] = ul.FORMAT + 1
         with pytest.raises(ul.UserListError, match="newer"):
-            ul.decode_share(ul._b64encode(ul._deflate(bytes(body))))
+            ul.decode_share(codec._b64encode(codec._deflate(bytes(body))))
 
     def test_trailing_bytes_are_refused(self):
-        body = ul._inflate(ul._b64decode(ul.encode_share([], release="r", key="k")))
+        body = codec._inflate(
+            codec._b64decode(ul.encode_share([], release="r", key="k"))
+        )
         with pytest.raises(ul.UserListError):
-            ul.decode_share(ul._b64encode(ul._deflate(body + b"x")))
+            ul.decode_share(codec._b64encode(codec._deflate(body + b"x")))
 
     @pytest.mark.parametrize("cut", [1, 3, 10])
     def test_a_truncated_link_is_refused(self, cut):
@@ -338,9 +343,9 @@ class TestMessageLimits:
         assert ul.IMPORT_CHUNK_CHARS * 3 < ul.MAX_MESSAGE_BYTES
 
     def test_the_browser_uses_the_same_numbers(self):
-        js = (Path(ul.__file__).parent.parent / "ui" / "js" / "my_lists.js").read_text(
-            encoding="utf-8"
-        )
+        js = (
+            Path(ul.__file__).parent.parent / "ui" / "js" / "my_lists.js"
+        ).read_text(encoding="utf-8")
         for name in ("MAX_MESSAGE_BYTES", "MAX_IMPORT_BYTES", "IMPORT_CHUNK_CHARS"):
             assert f"var {name} = {getattr(ul, name)};" in js, name
 

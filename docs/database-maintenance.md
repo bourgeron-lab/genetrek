@@ -24,7 +24,7 @@ uv run genetrek-db --help
 **Library** — for notebooks.
 
 ```python
-from genetrek.db import Database
+from genetrek_server.db import Database
 
 db = Database.open()
 db.list_fields()                       # renders as a table in Jupyter
@@ -469,7 +469,7 @@ dependency graph and refuses a cycle.
 
 ### Names that code depends on
 
-`genetrek.schema.CODE_DEPENDENT_COLUMNS` lists every column whose *name* appears in code, and
+`genetrek_server.schema.CODE_DEPENDENT_COLUMNS` lists every column whose *name* appears in code, and
 where. Renaming one is refused by default, because the code will not follow and the failure
 is quiet — `ui/components/stats_drawer.py` needs `shet_mean` (or `pli`), `loeuf` and `moeuf`,
 and renders a *"Missing columns"* label instead of the constraint plot. `--force` overrides
@@ -633,7 +633,7 @@ Warnings (fixable, harmless):
 
 ### The badge coupling
 
-The table only renders badges for the columns in `genetrek.schema.BADGE_RENDERED_COLUMNS`
+The table only renders badges for the columns in `genetrek_server.schema.BADGE_RENDERED_COLUMNS`
 (currently `inheritance` and `eagle_score`). Adding a third top-level key to `badges.yaml`
 has no visible effect until that column is added to the constant too — `validate` warns
 about exactly this.
@@ -808,7 +808,7 @@ Prefer building elsewhere and looking at it first:
 ```bash
 uv run genetrek-db init --output /tmp/gt-new
 GENETREK_RESOURCES=/tmp/gt-new uv run genetrek-db validate
-GENETREK_RESOURCES=/tmp/gt-new uv run genetrek --port 8130
+GENETREK_RESOURCES=/tmp/gt-new uv run genetrek-server --port 8130
 ```
 
 ### Caching and reproducibility
@@ -846,7 +846,7 @@ kept privately for this release and are not in the public repository. They will 
 with the next data release; until then, the reasoning they record is summarised here.
 
 **`notebooks/create_20260903.ipynb` is the worked example of doing it end to end**: it builds
-the backbone with `genetrek.db.build`, then adds ~30 annotation columns from an annotated HGNC
+the backbone with `genetrek_server.db.build`, then adds ~30 annotation columns from an annotated HGNC
 complete set, and ends with a database the webapp serves with every feature working. Read it
 before starting a new database — the reasoning cells record which of the source's 149 columns
 were rejected and why, which is the part that does not survive being rediscovered.

@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
+[manifest]
+members = [
+    "genetrek",
+    "genetrek-server",
+]
+
 [[package]]
 name = "aiofiles"
 version = "25.1.0"
@@ -506,10 +512,22 @@ wheels = [
 
 [[package]]
 name = "genetrek"
+version = "0.1.0.dev0"
+source = { editable = "client" }
+dependencies = [
+    { name = "polars" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "polars", specifier = ">=0.20.0" }]
+
+[[package]]
+name = "genetrek-server"
 version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "genetrek" },
     { name = "httpx" },
     { name = "nicegui" },
     { name = "plotly" },
@@ -539,6 +557,7 @@ notebooks = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.100.0" },
+    { name = "genetrek", editable = "client" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "nicegui", specifier = ">=1.4.0" },
     { name = "plotly", specifier = ">=5.18.0" },

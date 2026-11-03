@@ -16,10 +16,10 @@ import polars as pl
 import pytest
 import yaml
 
-from genetrek import paths, schema
-from genetrek.db.licences import licences_markdown
-from genetrek.paths import ResourcesNotFoundError
-from genetrek.services.versions import version_families
+from genetrek_server import paths, schema
+from genetrek_server.db.licences import licences_markdown
+from genetrek_server.paths import ResourcesNotFoundError
+from genetrek_server.services.versions import version_families
 
 
 @pytest.fixture(scope="module")

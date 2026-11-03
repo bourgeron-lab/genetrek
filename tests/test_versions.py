@@ -12,7 +12,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from genetrek.services.versions import (
+from genetrek_server.services.versions import (
     compare_boolean_columns,
     version_families,
     version_table_markdown,

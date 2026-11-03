@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import pytest
 
-from genetrek import schema
-from genetrek.config.loader import load_config
-from genetrek.schema import Category, CategoryOrder, FieldMeta
-from genetrek.ui.components.column_selector import (
+from genetrek_server import schema
+from genetrek_server.config.loader import load_config
+from genetrek_server.schema import Category, CategoryOrder, FieldMeta
+from genetrek_server.ui.components.column_selector import (
     MY_LISTS_GROUP,
     _tree_nodes,
     _with_locked,

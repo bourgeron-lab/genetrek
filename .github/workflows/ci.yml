@@ -20,9 +20,9 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --frozen --group dev
-      - run: uv run ruff check src/ tests/
-      - run: uv run ruff format --check src/ tests/
-      - run: uv run mypy src/genetrek/
+      - run: uv run ruff check src/ tests/ client/
+      - run: uv run ruff format --check src/ tests/ client/
+      - run: uv run mypy src/genetrek_server/ client/src/genetrek/
       # test_real_database.py checks the committed parquet against its metadata,
       # and DATA_LICENCES.md against every column's licence.
       - run: uv run pytest

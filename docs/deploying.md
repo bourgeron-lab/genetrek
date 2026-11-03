@@ -68,7 +68,7 @@ title and description only. Outside the chart, set it yourself to the address vi
 beside the application: a Deployment (one replica, `Recreate`), a Service, a 1 GiB
 ReadWriteOnce PersistentVolumeClaim for its SQLite database (kept by `helm uninstall`),
 and a `<basePath>/count` path on the application's own Ingress. The pages then report each
-load to it, with the page's path and nothing else (`src/genetrek/visits.py`).
+load to it, with the page's path and nothing else (`src/genetrek_server/visits.py`).
 
 ```yaml
 goatcounter:

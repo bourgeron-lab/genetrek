@@ -16,9 +16,9 @@ from datetime import date
 import polars as pl
 import pytest
 
-from genetrek.services import compare as cmp
-from genetrek.services import compare_export as export
-from genetrek.services import compare_figures as figures
+from genetrek_server.services import compare as cmp
+from genetrek_server.services import compare_export as export
+from genetrek_server.services import compare_figures as figures
 
 UNIVERSE = frozenset(f"HGNC:{i}" for i in range(1, 201))
 FRAME = pl.DataFrame(

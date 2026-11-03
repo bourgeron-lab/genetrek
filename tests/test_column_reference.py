@@ -9,16 +9,16 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from genetrek import schema
-from genetrek.config.loader import load_config
-from genetrek.schema import EMPTY_CATEGORIES, FieldMeta
-from genetrek.services.column_reference import (
+from genetrek_server import schema
+from genetrek_server.config.loader import load_config
+from genetrek_server.schema import EMPTY_CATEGORIES, FieldMeta
+from genetrek_server.services.column_reference import (
     column_reference_rows,
     column_reference_tsv,
     doi_url,
     format_date,
 )
-from genetrek.services.lookup import value_counts
+from genetrek_server.services.lookup import value_counts
 
 
 class TestOverTheSyntheticTree:

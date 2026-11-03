@@ -13,8 +13,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from genetrek.db.sources import gencode, hgnc, ncbi
-from genetrek.db.sources.fetcher import FetchError, HttpFetcher
+from genetrek_server.db.sources import gencode, hgnc, ncbi
+from genetrek_server.db.sources.fetcher import FetchError, HttpFetcher
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

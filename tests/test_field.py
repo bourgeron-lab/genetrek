@@ -8,9 +8,9 @@ import polars as pl
 import pytest
 from pydantic import ValidationError
 
-from genetrek import schema
-from genetrek.db import Database, Field
-from genetrek.schema import FieldMeta, today_stamp
+from genetrek_server import schema
+from genetrek_server.db import Database, Field
+from genetrek_server.schema import FieldMeta, today_stamp
 
 
 @pytest.fixture

@@ -16,13 +16,13 @@ import yaml
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from genetrek.api.routes import create_router
-from genetrek.config.loader import load_config
-from genetrek.models.schemas import CompareRequest, CompareSet
-from genetrek.paths import ENV_VAR
-from genetrek.services import compare as cmp
-from genetrek.services import compare_export as export
-from genetrek.services import user_lists as ul
+from genetrek_server.api.routes import create_router
+from genetrek_server.config.loader import load_config
+from genetrek_server.models.schemas import CompareRequest, CompareSet
+from genetrek_server.paths import ENV_VAR
+from genetrek_server.services import compare as cmp
+from genetrek_server.services import compare_export as export
+from genetrek_server.services import user_lists as ul
 
 BACKGROUNDS = {
     "backgrounds": [

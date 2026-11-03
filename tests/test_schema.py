@@ -8,8 +8,8 @@ import polars as pl
 import pytest
 from pydantic import ValidationError
 
-from genetrek import schema
-from genetrek.schema import FieldMeta, FieldsYamlError
+from genetrek_server import schema
+from genetrek_server.schema import FieldMeta, FieldsYamlError
 
 
 class TestFieldMeta:

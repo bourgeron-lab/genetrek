@@ -1,7 +1,7 @@
 [project]
-name = "genetrek"
+name = "genetrek-server"
 version = "2.0.0"
-description = "GeneTrek: curated gene lists and gene annotations for neurodevelopmental disorders, to search, compare and download."
+description = "GeneTrek server: the web application and API for curated gene lists and gene annotations in neurodevelopmental disorders."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -23,6 +23,9 @@ dependencies = [
     "rich>=13.0.0",
     "httpx>=0.28.1",
     "xlsxwriter>=3.2.9",
+    # The Python client: the server imports the code the two must share
+    # (the My lists codec, token splitting) from it, so there is one copy.
+    "genetrek",
 ]
 
 [project.urls]
@@ -36,7 +39,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/genetrek"]
+packages = ["src/genetrek_server"]
 
 [dependency-groups]
 dev = [
@@ -119,11 +122,11 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
 # UI composition modules: accept higher complexity and boolean params
-"src/genetrek/ui/*.py" = ["PLR0915", "FBT001", "FBT002", "ANN202", "PLR0912", "PLR0913"]
-"src/genetrek/ui/components/*.py" = ["PLR0915", "FBT001", "FBT002", "ANN202", "PLR0912", "PLR0913"]
+"src/genetrek_server/ui/*.py" = ["PLR0915", "FBT001", "FBT002", "ANN202", "PLR0912", "PLR0913"]
+"src/genetrek_server/ui/components/*.py" = ["PLR0915", "FBT001", "FBT002", "ANN202", "PLR0912", "PLR0913"]
 # CLI modules: Typer reads annotations at runtime via get_type_hints, so
 # TC003 would break it; the rest are Typer's Option/Argument idioms
-"src/genetrek/cli/*.py" = [
+"src/genetrek_server/cli/*.py" = [
     "FBT001",
     "FBT002",
     "PLR0913",
@@ -139,7 +142,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # endpoint as a closure over the config, which is the pattern create_router
 # already uses -- threading the config through module-level handlers instead
 # would trade a long function for a wider surface
-"src/genetrek/api/*.py" = [
+"src/genetrek_server/api/*.py" = [
     "FBT001",
     "FBT002",
     "PLR0913",
@@ -148,15 +151,15 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 ]
 # Database mutation API: add_field/save deliberately take many keyword-only
 # options, and metadata values are genuinely of arbitrary type
-"src/genetrek/db/database.py" = ["PLR0913", "ANN401"]
+"src/genetrek_server/db/database.py" = ["PLR0913", "ANN401"]
 # The coordinate cascade is configured, not overloaded: every extra argument
 # past the first two is keyword-only (column names, fallback, provenance)
-"src/genetrek/db/sources/coordinates.py" = ["PLR0913"]
+"src/genetrek_server/db/sources/coordinates.py" = ["PLR0913"]
 # The build passes one context bundle (plan, release, report) down to each
 # metadata factory rather than reassembling it per column
-"src/genetrek/db/build.py" = ["PLR0913"]
+"src/genetrek_server/db/build.py" = ["PLR0913"]
 # Atomicity needs os.replace's exact semantics, not Path.replace's wrapper
-"src/genetrek/db/storage.py" = ["PTH105"]
+"src/genetrek_server/db/storage.py" = ["PTH105"]
 # Tests: asserts, magic values, and untyped fixtures are idiomatic; pytest
 # discovers tests/ by rootdir, so no __init__.py (INP001)
 "tests/*.py" = [
@@ -221,7 +224,7 @@ module = ["xlsxwriter.*"]
 follow_untyped_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "client/tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*", "*Test"]
 python_functions = ["test_*"]
@@ -231,6 +234,14 @@ markers = [
 ]
 
 [project.scripts]
-genetrek = "genetrek.web:main"
-genetrek-db = "genetrek.cli:main"
-genetrek-validate-fields = "genetrek.validate_fields:main"
+genetrek-server = "genetrek_server.web:main"
+genetrek-db = "genetrek_server.cli:main"
+genetrek-validate-fields = "genetrek_server.validate_fields:main"
+
+# The repository is a uv workspace: this project is the server, `client/` is the
+# `genetrek` package published on PyPI (import genetrek, command genetrek).
+[tool.uv.workspace]
+members = ["client"]
+
+[tool.uv.sources]
+genetrek = { workspace = true }

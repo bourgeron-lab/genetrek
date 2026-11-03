@@ -15,10 +15,10 @@ import yaml
 from fakes import full_fetcher
 from typer.testing import CliRunner
 
-from genetrek import paths
-from genetrek.cli import app, init_cmds
-from genetrek.content import CONTENT_PAGES
-from genetrek.db import Database
+from genetrek_server import paths
+from genetrek_server.cli import app, init_cmds
+from genetrek_server.content import CONTENT_PAGES
+from genetrek_server.db import Database
 
 if TYPE_CHECKING:
     from pathlib import Path

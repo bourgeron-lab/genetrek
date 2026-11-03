@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING
 import polars as pl
 import pytest
 
-from genetrek import schema
-from genetrek.db import Database, DatabaseError, ValidationFailedError
-from genetrek.schema import DerivationError, FieldMeta
+from genetrek_server import schema
+from genetrek_server.db import Database, DatabaseError, ValidationFailedError
+from genetrek_server.schema import DerivationError, FieldMeta
 
 if TYPE_CHECKING:
     from tests.conftest import SyntheticResources

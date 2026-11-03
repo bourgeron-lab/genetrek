@@ -6,9 +6,9 @@ import polars as pl
 import pytest
 import yaml
 
-from genetrek import schema
-from genetrek.db import Database, DatabaseError, ValidationFailedError
-from genetrek.db.database import LEGACY_PRIMARY_KEY as PRIMARY_KEY
+from genetrek_server import schema
+from genetrek_server.db import Database, DatabaseError, ValidationFailedError
+from genetrek_server.db.database import LEGACY_PRIMARY_KEY as PRIMARY_KEY
 
 
 @pytest.fixture

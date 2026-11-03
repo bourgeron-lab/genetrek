@@ -14,10 +14,10 @@ from pathlib import Path
 
 import pytest
 
-import genetrek
-from genetrek import visits
+import genetrek_server
+from genetrek_server import visits
 
-SRC = Path(genetrek.__file__).parent
+SRC = Path(genetrek_server.__file__).parent
 
 
 class TestConfiguration:

@@ -10,10 +10,10 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from genetrek import paths, schema
-from genetrek.cli import app
-from genetrek.db import Database
-from genetrek.schema import today_stamp
+from genetrek_server import paths, schema
+from genetrek_server.cli import app
+from genetrek_server.db import Database
+from genetrek_server.schema import today_stamp
 
 runner = CliRunner()
 

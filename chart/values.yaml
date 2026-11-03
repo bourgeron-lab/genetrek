@@ -84,7 +84,7 @@ probes:
     failureThreshold: 3
 
 # Visit counting with a self-hosted GoatCounter: page loads, unique visitors and
-# their country, nothing else (src/genetrek/visits.py says exactly what the
+# their country, nothing else (src/genetrek_server/visits.py says exactly what the
 # pages send). Off by default, so a deployment of the public chart counts
 # nothing unless it asks to.
 goatcounter:

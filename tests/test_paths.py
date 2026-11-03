@@ -7,8 +7,8 @@ import time
 
 import pytest
 
-from genetrek import paths
-from genetrek.paths import ENV_VAR, ResourcesNotFoundError
+from genetrek_server import paths
+from genetrek_server.paths import ENV_VAR, ResourcesNotFoundError
 
 
 class TestResolution:

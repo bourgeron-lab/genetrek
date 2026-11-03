@@ -2,7 +2,7 @@
 {{- $gc := .Values.goatcounter }}
 {{/*
 Visit counting: a self-hosted GoatCounter that records page loads, sessions and
-countries, and is told nothing but each page's path (src/genetrek/visits.py).
+countries, and is told nothing but each page's path (src/genetrek_server/visits.py).
 One pod with SQLite on a ReadWriteOnce volume, so everything below follows from
 there being exactly one writer.
 */}}
