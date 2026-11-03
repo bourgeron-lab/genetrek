@@ -74,7 +74,8 @@ GET /api/fields/hc_ndd/genes/tsv?drop_empty=true
 
 `drop_empty=true` omits genes with no value. For a yes/no column that also omits
 the genes where the answer is no — so what you get back is the list's membership,
-which is usually the point. Without it you get all 45,045 genes and their values.
+which is usually the point. Without it you get every gene (45,083 in this release) and its
+value.
 
 Add `/tsv` for a two-column tab-separated file instead of JSON. A gene that was not
 measured is written `NA` there (and `null` in JSON), never left blank, so it

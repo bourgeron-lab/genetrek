@@ -4,7 +4,7 @@ The database is a **pair** of files that only make sense together:
 
 | File | What it holds |
 |---|---|
-| `resources/processed_data/genetrek.parquet` | 61,669 genes × 67 fields |
+| `resources/processed_data/genetrek.parquet` | 45,083 genes × 87 fields |
 | `resources/config/fields_description.yaml` | one metadata entry per parquet column |
 
 The webapp reads both at startup. If they disagree, columns silently vanish from the UI,
@@ -183,21 +183,23 @@ Columns are now found by what they mean. Two metadata keys carry that:
 | `id_type` | which identifier or coordinate component this column *is* |
 | `primary_key` | whether this is the column identifiers resolve onto |
 
-They are orthogonal on purpose: `ncbi_id` is both *the NCBI ID* (`id_type: ncbi`) and *the
+They are orthogonal on purpose: `hgnc_id` is both *the HGNC ID* (`id_type: hgnc`) and *the
 key* (`primary_key: true`), and one field could not say both.
 
 ```yaml
+hgnc_id:
+  id_type: hgnc
+  primary_key: true
+hgnc_symbol:
+  id_type: symbol
 ncbi_id:
   id_type: ncbi
-  primary_key: true
-symbol:
-  id_type: symbol
-hg38_chr:
+grch38_chr:
   id_type: locus_chr
-  assembly: hg38
-hg38_start:
+  assembly: GRCh38
+grch38_start:
   id_type: locus_start
-  assembly: hg38
+  assembly: GRCh38
 ```
 
 `schema.resolve_roles()` turns that into a `Roles` object the code asks instead of guessing:
@@ -205,14 +207,14 @@ hg38_start:
 ```python
 db = Database.open()
 print(db.roles.describe())
-#   primary_key: ncbi_id
-#   symbol: symbol
+#   primary_key: hgnc_id
+#   symbol: hgnc_symbol
 #   ensg: ensg
 #   ncbi: ncbi_id
 #   hgnc: hgnc_id
 #   omim: omim_id
-#   hg19: hg19_chr / hg19_start / hg19_end
-#   hg38: hg38_chr / hg38_start / hg38_end
+#   GRCh37: grch37_chr / grch37_start / grch37_end
+#   GRCh38: grch38_chr / grch38_start / grch38_end
 ```
 
 ### What this buys you
@@ -255,7 +257,8 @@ search was run", which was the most misleading thing the app could do.
 ## Gene identifier resolution
 
 Gene lists arrive keyed on whatever the source used. Resolution normalises all of it onto
-`ncbi_id`, the one identifier that is complete and unique across all 61,669 rows.
+the primary key, `hgnc_id`: the one identifier that is complete and unique across all 45,083
+rows (`ncbi_id` is missing for 665 genes).
 
 | Input | Handling |
 |---|---|
@@ -279,9 +282,9 @@ Mixed lists work: with `--id-type auto` (the default), as soon as more than one
 recognisable shape is present each value is classified on its own. A majority rule would
 resolve a mostly-symbol list wholly as symbols and silently fail the few Ensembl IDs in it.
 
-Bare integers are genuinely ambiguous — `ncbi_id`, `hgnc_id` and `omim_id` are all plain
-integers in the parquet — so they are read as `ncbi_id` with a warning. Pass `--id-type`
-when the source is something else.
+Bare integers are genuinely ambiguous — an NCBI gene ID, the number of an HGNC ID and an OMIM
+number all look alike — so they are read as `ncbi_id` with a warning. Pass `--id-type` when
+the source is something else.
 
 ### Why the HGNC file matters
 
@@ -323,7 +326,7 @@ writing anything. Drop it, add `--yes`, and it saves.
 ### Numeric columns and dtype
 
 A numeric column keeps whatever dtype the input has, so cast it deliberately before adding.
-`Float32` halves a column's memory (248 KiB versus 489 KiB over 61,669 rows) and is right for
+`Float32` halves a column's memory (182 KiB versus 358 KiB over 45,083 rows) and is right for
 most measurements, but **it underflows anything below ~1.2e-38 to `0.0`** — which reads as the
 exact opposite of a very small probability.
 
@@ -351,7 +354,7 @@ Controlled by `--missing` (`missing=` in the library):
   it); every other type is left null.
 - `keep` — leave them null whatever the type.
 - `fill --fill VALUE` — use an explicit value.
-- `error` — refuse unless every one of the 61,669 rows is covered.
+- `error` — refuse unless every one of the 45,083 rows is covered.
 
 **`auto` and `keep` are not interchangeable for booleans**, and the database contains both
 conventions:
@@ -385,7 +388,7 @@ exists to prevent. The two kinds are separate, because they mean different thing
 uv run genetrek-db remove old_field
 ```
 
-Refused when the field is `ncbi_id` (everything resolves onto it) or when the webapp
+Refused when the field is the primary key (`hgnc_id`; everything resolves onto it) or when the webapp
 configuration references it — a `badges.yaml` key or an `external_links.yaml` `{placeholder}`.
 `--force` overrides the staging check, but `save` still validates: to actually drop `ensg`
 you must also remove `{ensg}` from `external_links.yaml`, or the app would be left with a
@@ -621,7 +624,8 @@ Errors (these block a save):
 - a declared `value_type` that no longer matches the parquet dtype
 - an empty `fullname`
 - the primary-key column missing, null anywhere, or not unique — whichever column
-  `primary_key` marks (`ncbi_id` today, `hgnc_id` in a database built by `init`)
+  `primary_key` marks (`hgnc_id` in the shipped database and in any built by `init`; older
+  databases used `ncbi_id`)
 - `badges.yaml` naming a field that does not exist
 - an `external_links.yaml` `{placeholder}` that is not a field
 

@@ -3,7 +3,7 @@
 The synthetic tree is what makes several of these testable at all. Its
 ``symbol`` column repeats ``GENE01`` on the last row, so ambiguity is
 reachable -- on the real database both the symbol and the primary key are
-unique across all 45,045 genes. Its primary key is ``ncbi_id`` where the real
+unique across all 45,083 genes. Its primary key is ``ncbi_id`` where the real
 one is ``hgnc_id``, so anything that reads a key from a literal rather than
 from ``roles`` fails here. And ``loeuf`` is hidden in both, which is the whole
 reason the visibility policy exists.

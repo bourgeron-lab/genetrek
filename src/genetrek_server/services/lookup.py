@@ -39,7 +39,7 @@ class AmbiguousGeneError(LookupError):
     """One identifier names several genes.
 
     Carries the candidate keys rather than picking one: on the real database
-    both the symbol and the primary key are unique across all 45,045 rows, so
+    both the symbol and the primary key are unique across all 45,083 rows, so
     reaching this means the data changed shape and the caller should be told,
     not handed an arbitrary row.
     """
