@@ -12,14 +12,16 @@ import io
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from genetrek.tokens import split_tokens
 
 from genetrek_server import schema
+from genetrek_server.api.errors import ApiError
 from genetrek_server.db.field import field_stats
 from genetrek_server.db.gene_index import GeneIndex, GeneIndexError
 from genetrek_server.models.schemas import (
+    MAX_SEARCH_TOKENS,
     ConversionResult,
     ConvertRequest,
     ConvertResponse,
@@ -33,8 +35,18 @@ from genetrek_server.models.schemas import (
     GeneMatch,
     GenePair,
     GeneResponse,
+    GeneRow,
+    GenesRequest,
+    GenesResponse,
+    SearchRequest,
+    SearchResponse,
 )
 from genetrek_server.services import lookup
+from genetrek_server.services.search import (
+    SearchUnavailableError,
+    filter_dataframe,
+    unmatched_tokens,
+)
 
 if TYPE_CHECKING:
     from genetrek_server.config.loader import AppConfig
@@ -97,9 +109,8 @@ def register_lookup_routes(
 
     def _require_index() -> GeneIndex:
         if gene_index is None:
-            raise HTTPException(
-                status_code=503,
-                detail=f"gene resolution unavailable: {index_problem}",
+            raise ApiError(
+                503, "unavailable", f"gene resolution unavailable: {index_problem}"
             )
         return gene_index
 
@@ -115,14 +126,14 @@ def register_lookup_routes(
         try:
             real = lookup.resolve_field_name(name, config.fields, config.field_aliases)
         except lookup.FieldNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
+            raise ApiError(404, "unknown_field", str(exc)) from exc
         return real, config.fields[real]
 
     def _id_column(id_type: str) -> str:
         try:
             return lookup.identifier_column(config.roles, id_type)
         except lookup.IdentifierRoleError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise ApiError(400, "unknown_id_type", str(exc)) from exc
 
     def _summary(name: str, *, n_genes: int | None = None) -> FieldSummary:
         return FieldSummary(
@@ -149,16 +160,17 @@ def register_lookup_routes(
         """Resolve one user-supplied identifier onto one gene."""
         report = _require_index().resolve([query])
         if report.frame.height == 0:
-            raise HTTPException(status_code=404, detail=f"no gene matches {query!r}")
+            raise ApiError(404, "unknown_gene", f"no gene matches {query!r}")
         row = report.frame.row(0, named=True)
         if row["matched_by"] == "ambiguous":
             candidates = ", ".join(_ambiguous_keys(query)) or "several genes"
-            raise HTTPException(
-                status_code=409,
-                detail=f"{query!r} is ambiguous; it matches {candidates}",
+            raise ApiError(
+                409,
+                "ambiguous_gene",
+                f"{query!r} is ambiguous; it matches {candidates}",
             )
         if (key := row[report.key]) is None:
-            raise HTTPException(status_code=404, detail=f"no gene matches {query!r}")
+            raise ApiError(404, "unknown_gene", f"no gene matches {query!r}")
         return GeneMatch(
             input=row["input"],
             matched_by=row["matched_by"],
@@ -171,13 +183,28 @@ def register_lookup_routes(
         try:
             row = lookup.gene_row(config.df, config.roles, match.key)
         except lookup.AmbiguousGeneError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
+            raise ApiError(409, "ambiguous_gene", str(exc)) from exc
         if row is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"no gene matches {match.input!r}",
-            )
+            raise ApiError(404, "unknown_gene", f"no gene matches {match.input!r}")
         return row
+
+    def _columns(names: list[str] | None, *, include_hidden: bool) -> list[str]:
+        """The value columns a gene lookup returns, in display order.
+
+        Named columns resolve aliases and reach hidden columns; unnamed means
+        every visible one, or every one with ``include_hidden``.
+        """
+        if names:
+            selected = [_field(name)[0] for name in names]
+        else:
+            selected = [
+                name
+                for name, meta in config.fields.items()
+                if include_hidden or meta.visibility != "hidden"
+            ]
+        return schema.in_display_order(
+            list(dict.fromkeys(selected)), config.column_order
+        )
 
     @router.get("/fields", response_model=FieldListResponse)
     def list_fields(
@@ -404,16 +431,12 @@ def register_lookup_routes(
         match = _match(gene)
         row = _row(match)
 
-        if columns:
-            requested = [name.strip() for name in columns.split(",") if name.strip()]
-            selected = [_field(name)[0] for name in requested]
-        else:
-            selected = [
-                name
-                for name, meta in config.fields.items()
-                if include_hidden or meta.visibility != "hidden"
-            ]
-        ordered = schema.in_display_order(selected, config.column_order)
+        requested = (
+            [name.strip() for name in columns.split(",") if name.strip()]
+            if columns
+            else None
+        )
+        ordered = _columns(requested, include_hidden=include_hidden)
 
         id_columns = config.roles.identifiers
         return GeneResponse(
@@ -478,11 +501,12 @@ def register_lookup_routes(
         """
         values = split_tokens(ids)
         if not values:
-            raise HTTPException(status_code=400, detail="no identifiers given")
+            raise ApiError(400, "no_identifiers", "no identifiers given")
         if len(values) > MAX_CONVERT_IDS:
-            raise HTTPException(
-                status_code=400,
-                detail=(
+            raise ApiError(
+                400,
+                "too_many_ids",
+                (
                     f"{len(values)} identifiers exceeds the {MAX_CONVERT_IDS} limit; "
                     f"use POST /api/convert, or /api/download/database for a "
                     f"whole-table join"
@@ -502,8 +526,155 @@ def register_lookup_routes(
         """
         values = [v.strip() for v in body.ids if v.strip()]
         if not values:
-            raise HTTPException(status_code=400, detail="no identifiers given")
+            raise ApiError(400, "no_identifiers", "no identifiers given")
         return _convert(values, body.from_id_type, body.to)
+
+    @router.post("/genes", response_model=GenesResponse)
+    def lookup_genes(body: GenesRequest) -> GenesResponse:
+        """Many genes at once, by any identifiers, with the columns asked for.
+
+        ``GET /api/genes/{gene}`` for a list: one request instead of one per
+        gene, and the identifiers in the body, out of the access logs.
+        """
+        values = [v.strip() for v in body.ids if v.strip()]
+        if not values:
+            raise ApiError(400, "no_identifiers", "no identifiers given")
+        columns = _columns(body.columns, include_hidden=body.include_hidden)
+        index = _require_index()
+        try:
+            report = index.resolve(values, body.from_id_type)
+        except (GeneIndexError, ValueError) as exc:
+            raise ApiError(400, "unknown_id_type", str(exc)) from exc
+
+        key = report.key
+        id_columns = config.roles.identifiers
+        wanted = list(dict.fromkeys([key, *id_columns.values(), *columns]))
+        # The row index carries input order through the join, as in
+        # `_conversion_results`: a lookup that reorders its answer is wrong.
+        found = (
+            report.resolved()
+            .select("input", "matched_by", "note", key)
+            .with_row_index("_pos")
+            .join(config.df.select(wanted), on=key, how="left")
+            .sort("_pos")
+        )
+        return GenesResponse(
+            requested_id_type=body.from_id_type,
+            id_type=report.id_type,
+            detected=report.detected,
+            n_input=report.n_input,
+            n_found=found.height,
+            key_column=key,
+            id_columns=id_columns,
+            columns=columns,
+            symbol_coverage=index.symbol_coverage,
+            warnings=list(report.warnings),
+            not_found=report.unmatched,
+            ambiguous=report.ambiguous,
+            genes=[
+                GeneRow(
+                    input=row["input"],
+                    matched_by=row["matched_by"],
+                    note=row["note"] or "",
+                    key=str(row[key]),
+                    identifiers={
+                        role: row.get(col) for role, col in id_columns.items()
+                    },
+                    values={name: row.get(name) for name in columns},
+                )
+                for row in found.iter_rows(named=True)
+            ],
+        )
+
+    @router.post("/search", response_model=SearchResponse)
+    def search(body: SearchRequest) -> SearchResponse:
+        """The table's search over HTTP: tokens, loci and annotation filters.
+
+        The same function the search drawer calls, so the two return the same
+        genes. A POST because the tokens can be a patient's genes.
+        """
+        tokens = (
+            [t.strip() for t in body.tokens if t.strip()]
+            if body.tokens is not None
+            else split_tokens(body.text or "")
+        )
+        if len(tokens) > MAX_SEARCH_TOKENS:
+            raise ApiError(
+                400,
+                "too_many_ids",
+                f"{len(tokens)} tokens exceeds the {MAX_SEARCH_TOKENS} limit",
+            )
+        assemblies = sorted(config.roles.assemblies)
+        if body.genome is None:
+            genome = assemblies[-1] if assemblies else ""
+        else:
+            by_lower = {a.lower(): a for a in assemblies}
+            if (chosen := by_lower.get(body.genome.strip().lower())) is None:
+                raise ApiError(
+                    400,
+                    "unknown_genome",
+                    f"unknown genome {body.genome!r}; available: {assemblies}",
+                )
+            genome = chosen
+        filters = [_field(name)[0] for name in body.filters]
+        if not_lists := [f for f in filters if f not in config.all_boolean_columns]:
+            raise ApiError(
+                400,
+                "not_a_gene_list",
+                f"filters must be gene lists (Boolean columns): {not_lists}",
+            )
+        if not tokens and not filters:
+            raise ApiError(400, "no_identifiers", "no tokens and no filters given")
+        columns = _columns(body.columns, include_hidden=False)
+        resolve_symbols = lookup.symbol_resolver(gene_index)
+        text = ",".join(tokens)
+        try:
+            matched = filter_dataframe(
+                config.df,
+                text,
+                exact_match=body.exact,
+                selected_bool_cols=filters,
+                results_merge=body.merge,
+                annotations_merge=body.filter_mode,
+                selected_genome=genome,
+                roles=config.roles,
+                symbol_resolver=resolve_symbols,
+            )
+        except SearchUnavailableError as exc:
+            raise ApiError(503, "unavailable", str(exc)) from exc
+        unmatched = (
+            unmatched_tokens(
+                config.df,
+                tokens,
+                selected_genome=genome,
+                roles=config.roles,
+                symbol_resolver=resolve_symbols,
+            )
+            if tokens
+            else []
+        )
+        id_columns = config.roles.identifiers
+        key = config.roles.primary_key or ""
+        wanted = list(
+            dict.fromkeys(
+                [
+                    c
+                    for c in [key, *id_columns.values(), *columns]
+                    if c in matched.columns
+                ]
+            )
+        )
+        total = matched.height
+        page = matched.select(wanted).slice(body.offset, body.limit)
+        return SearchResponse(
+            genome=genome or None,
+            total=total,
+            unmatched=unmatched,
+            key_column=key,
+            id_columns=id_columns,
+            columns=columns,
+            rows=page.to_dicts(),
+        )
 
     def _convert(
         values: list[str],
@@ -518,7 +689,7 @@ def register_lookup_routes(
         try:
             report = index.resolve(values, from_id_type)
         except (GeneIndexError, ValueError) as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise ApiError(400, "unknown_id_type", str(exc)) from exc
 
         return ConvertResponse(
             requested_id_type=from_id_type,

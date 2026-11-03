@@ -20,8 +20,8 @@ from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
 import polars as pl
-from fastapi import APIRouter, HTTPException
 
+from genetrek_server.api.errors import ApiError
 from genetrek_server.models.schemas import (
     AdjustedPairResult,
     BackgroundInfo,
@@ -41,6 +41,8 @@ from genetrek_server.services import lookup
 from genetrek_server.services import user_lists as ul
 
 if TYPE_CHECKING:
+    from fastapi import APIRouter
+
     from genetrek_server.backgrounds import Background, Covariate
     from genetrek_server.config.loader import AppConfig
     from genetrek_server.db.gene_index import GeneIndex
@@ -143,13 +145,12 @@ def register_compare_routes(
                 config.field_aliases,
             )
         except lookup.FieldNotFoundError as exc:
-            raise HTTPException(
-                status_code=422, detail=f"set {index + 1}: {exc}"
-            ) from exc
+            raise ApiError(422, "unknown_field", f"set {index + 1}: {exc}") from exc
         if column not in config.all_boolean_columns:
-            raise HTTPException(
-                status_code=422,
-                detail=f"set {index + 1}: {column!r} is not a gene list (a Boolean column)",
+            raise ApiError(
+                422,
+                "not_a_gene_list",
+                f"set {index + 1}: {column!r} is not a gene list (a Boolean column)",
             )
         assert key is not None  # noqa: S101 -- checked by the caller
         # A filter keeps only True rows: null ("not measured") is not membership,
@@ -186,21 +187,18 @@ def register_compare_routes(
         spec: CompareSet, index: int
     ) -> tuple[cmp.GeneSet, CompareSetResult]:
         if gene_index is None:
-            raise HTTPException(
-                status_code=503,
-                detail=f"gene resolution unavailable: {index_problem}",
+            raise ApiError(
+                503,
+                "unavailable",
+                f"gene resolution unavailable: {index_problem}",
             )
         values = [v.strip() for v in spec.genes or [] if v and v.strip()]
         if not values:
-            raise HTTPException(
-                status_code=422, detail=f"set {index + 1}: no genes given"
-            )
+            raise ApiError(422, "invalid_set", f"set {index + 1}: no genes given")
         try:
             report = gene_index.resolve(values, spec.id_type)
         except (ValueError, LookupError) as exc:
-            raise HTTPException(
-                status_code=422, detail=f"set {index + 1}: {exc}"
-            ) from exc
+            raise ApiError(422, "invalid_set", f"set {index + 1}: {exc}") from exc
         genes = cmp.keys_where(report.resolved()[report.key])
         label = spec.label or f"Set {index + 1}"
         gene_set = cmp.GeneSet(f"genes:{index}", label, label, "my_list", genes)
@@ -236,21 +234,21 @@ def register_compare_routes(
                 )
                 source = "lists_file"
         except ul.UserListError as exc:
-            raise HTTPException(
-                status_code=422, detail=f"set {index + 1}: {exc}"
-            ) from exc
+            raise ApiError(422, "invalid_set", f"set {index + 1}: {exc}") from exc
         if list_key != key:
-            raise HTTPException(
-                status_code=422,
-                detail=(
+            raise ApiError(
+                422,
+                "invalid_set",
+                (
                     f"set {index + 1}: the link was made for a database keyed on "
                     f"{list_key!r}, not {key!r}"
                 ),
             )
         if spec.list_index >= len(lists):
-            raise HTTPException(
-                status_code=422,
-                detail=(
+            raise ApiError(
+                422,
+                "invalid_set",
+                (
                     f"set {index + 1}: list_index {spec.list_index}, but it holds "
                     f"{len(lists)} list(s)"
                 ),
@@ -281,16 +279,18 @@ def register_compare_routes(
     def compare(body: CompareRequest) -> CompareResponse:
         """Compare 2 to 12 gene sets: the Compare view's statistics, over HTTP."""
         if key is None:
-            raise HTTPException(
-                status_code=503,
-                detail="this database has no primary key; sets cannot be compared",
+            raise ApiError(
+                503,
+                "unavailable",
+                "this database has no primary key; sets cannot be compared",
             )
         backgrounds = {b.name: b for b in config.backgrounds}
         name = body.background or config.backgrounds[0].name
         if name not in backgrounds:
-            raise HTTPException(
-                status_code=422,
-                detail=f"unknown background {name!r}; available: {list(backgrounds)}",
+            raise ApiError(
+                422,
+                "unknown_background",
+                f"unknown background {name!r}; available: {list(backgrounds)}",
             )
         background = backgrounds[name]
         covariates = {c.name: c for c in config.covariates}
@@ -298,9 +298,10 @@ def register_compare_routes(
             list(covariates)[:1] if body.adjust_for is None else list(body.adjust_for)
         )
         if unknown := [w for w in wanted if w not in covariates]:
-            raise HTTPException(
-                status_code=422,
-                detail=f"unknown covariate(s) {unknown}; available: {list(covariates)}",
+            raise ApiError(
+                422,
+                "unknown_covariate",
+                f"unknown covariate(s) {unknown}; available: {list(covariates)}",
             )
         covariate = covariates[wanted[0]] if wanted else None
 

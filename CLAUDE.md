@@ -131,6 +131,13 @@ server imports it, never the reverse -- the client must install without FastAPI 
   computed within the background plus a "none" stratum) -- side by side, because the gap
   is the finding. The LOEUF strata are computed within the *analysed* universe, so a
   coverage restriction re-bins them.
+- **The API is versioned and its errors are coded.** `api/errors.py` holds `API_VERSION`
+  (minor = additive, major = breaking; reported by `/api/health` and the
+  `X-GeneTrek-API-Version` header) and `ERROR_CODES`. Raise `ApiError(status, code, detail)`,
+  never a bare `HTTPException`, in `/api` routes: `VersionedRoute` (the router's route class,
+  so it holds in the tests' bare apps too) turns it into `{"detail", "code"}`, and the
+  `genetrek` client maps each code to an exception. A new code goes in `ERROR_CODES` *and*
+  the table in `api-reference.md` (`tests/test_api_v11.py` checks).
 - **Gene lists reach the API by POST only** (`/api/compare`, `/api/convert`): bodies are
   not in access logs, URLs are. Nothing is stored. `request.json` in every Compare
   download is the exact `POST /api/compare` body (database lists by field, anything else
@@ -293,7 +300,8 @@ server imports it, never the reverse -- the client must install without FastAPI 
   is a gene list's membership), `/api/genes/{gene}` takes any identifier and `?columns=`
   reaches **hidden** columns by name (the only way to read e.g. `moeuf`/`soeuf`),
   `/api/genes/{gene}/genesets` lists every boolean column true for a gene, and
-  `/api/convert` resolves identifiers. `/docs` is the generated reference;
+  `/api/convert` resolves identifiers. `POST /api/genes` looks up many genes × columns at
+  once and `POST /api/search` runs the search drawer's `filter_dataframe` over HTTP. `/docs` is the generated reference;
   `resources/content/api-reference.md` is the prose one, served at `/api-reference`. Endpoints are named after roles,
   never after columns — nothing here belongs in `CODE_DEPENDENT_COLUMNS`.
 - **Add a prose page**: one `ContentPage` entry in `src/genetrek_server/content.py` and one

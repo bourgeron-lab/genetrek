@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 
 from genetrek_server import paths
 from genetrek_server.api.compare_routes import register_compare_routes
+from genetrek_server.api.errors import API_VERSION, ApiError, VersionedRoute
 from genetrek_server.api.lookup_routes import register_lookup_routes
 from genetrek_server.models.schemas import DataResponse
 from genetrek_server.services import lookup
@@ -28,7 +29,7 @@ def create_router(
     ``resolver`` is a shared :func:`genetrek_server.services.lookup.build_gene_index`
     result; without one the lookup endpoints build their own.
     """
-    router = APIRouter(prefix="/api")
+    router = APIRouter(prefix="/api", route_class=VersionedRoute)
 
     @router.get("/data", response_model=DataResponse)
     def get_data(
@@ -50,7 +51,7 @@ def create_router(
             selected_columns = config.primary_columns
 
         if not selected_columns:
-            raise HTTPException(status_code=400, detail="No valid columns selected")
+            raise ApiError(400, "no_columns", "No valid columns selected")
 
         filtered_df = config.df.select(selected_columns)
         start = (page - 1) * per_page
@@ -97,10 +98,7 @@ def create_router(
                 },
             )
 
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid format. Use tsv or parquet.",
-        )
+        raise ApiError(400, "unknown_format", "Invalid format. Use tsv or parquet.")
 
     # One resolver for the lookup and the compare endpoints. Built here when
     # the caller did not share one -- a test client, typically.
@@ -126,7 +124,10 @@ def create_router(
             "status": "ok",
             "rows": config.df.height,
             "columns": config.df.width,
+            # The build (image tag); `database_release` is the data's.
             "release": os.environ.get("GENETREK_RELEASE", "unknown"),
+            "database_release": config.release,
+            "api_version": API_VERSION,
         }
 
     return router
