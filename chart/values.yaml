@@ -37,15 +37,16 @@ ingress:
 
 resources:
   requests:
-    # Measured steady state is ~211 MB resident: the frame itself is only
+    # Measured steady state is ~250 MiB (cgroup): the frame itself is only
     # ~14 MB, the rest is the interpreter plus polars, scipy, numpy and nicegui.
     memory: 384Mi
     cpu: 200m
   limits:
-    # Sized for the download path, not for steady state. Serialising the whole
-    # database to JSON peaks around 570 MB, so a 512Mi limit would OOMKill on
-    # the first such request.
-    memory: 1536Mi
+    # Sized for downloads, measured in a pod (cgroup memory.peak, 2026-11-03):
+    # idle 257 MiB, one whole-table TSV 317 MiB, three at once 456 MiB; Parquet
+    # and a 12-set comparison cost less. 768Mi leaves ~300 MiB above three
+    # concurrent TSV downloads. (It was 1536Mi for the JSON export, removed.)
+    memory: 768Mi
     # One uvicorn worker cannot use more than one core.
     cpu: "1"
 
@@ -76,9 +77,10 @@ probes:
     timeoutSeconds: 3
     failureThreshold: 3
   liveness:
-    # Deliberately slack: this is one worker on one event loop, and serialising
-    # a download blocks it for seconds under a one-core limit. A tight probe
-    # would restart the pod in the middle of a user's download.
+    # Deliberately slack: this is one worker on one event loop. The /api
+    # downloads run in a threadpool, but the page's "Download current results"
+    # builds its file on the loop, and under a one-core limit any large
+    # serialisation slows it. A tight probe would restart the pod mid-download.
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 3

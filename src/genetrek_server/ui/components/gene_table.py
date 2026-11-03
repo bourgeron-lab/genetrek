@@ -21,11 +21,15 @@ if TYPE_CHECKING:
     from genetrek_server.config.loader import AppConfig
     from genetrek_server.ui.components.copy_genes import GeneCopier
 
-#: Pinned deliberately. Unpinned, this URL followed the dist-tag to table-core
-#: 9, which replaced ``createTable`` with a ``tableFeatures`` API -- so the table
-#: stopped rendering with ``TanStack.getCoreRowModel is not a function`` and no
-#: code change on our side. ui/js/gene_table.js is written against the v8 API.
-_TANSTACK_CDN = "https://cdn.jsdelivr.net/npm/@tanstack/table-core@8.21.3/+esm"
+#: TanStack table-core, vendored under ``ui/js/vendor/`` and served at
+#: ``/vendor/`` -- the last thing the page loaded from a third-party host. Its UMD
+#: build defines ``window.TableCore``. Pinned to 8.x deliberately: table-core 9
+#: replaced ``createTable`` with a ``tableFeatures`` API, and ui/js/gene_table.js
+#: is written against v8 (an unpinned CDN URL once followed the dist-tag to 9 and
+#: the table stopped rendering). ``ui/js/vendor/README.md`` says how to update it.
+TANSTACK_FILE = "tanstack-table-core-8.21.3.umd.min.js"
+VENDOR_ROUTE = "/vendor"
+VENDOR_DIR = Path(__file__).parent.parent / "js" / "vendor"
 
 
 class GeneTable:
@@ -79,28 +83,30 @@ class GeneTable:
         ui.on("geneInfo", self._handle_gene_info)
 
     def _inject_scripts(self) -> None:
-        """Inject the TanStack CDN import and the gene_table.js class."""
+        """Inject TanStack (vendored) and the gene_table.js class."""
         gene_table_js = (
             Path(__file__).parent.parent / "js" / "gene_table.js"
         ).read_text()
 
-        # Use a regular <script> to keep definitions in global scope.
-        # TanStack is loaded via dynamic import() which returns a promise.
+        # Regular scripts, not modules, to keep definitions in global scope. A
+        # classic <script src> blocks and runs in order, so window.TableCore is
+        # defined by the time the inline script below runs.
         ui.add_head_html(f"""
+        <script src="{VENDOR_ROUTE}/{TANSTACK_FILE}"></script>
         <script>
         (function() {{
-            // Load TanStack core via dynamic import, then define GeneTrekTable
-            import('{_TANSTACK_CDN}').then(function(mod) {{
-                window.TanStackTable = {{
-                    createTable: mod.createTable,
-                    getCoreRowModel: mod.getCoreRowModel,
-                }};
+            var mod = window.TableCore;
+            if (!mod) {{
+                console.error('[GeneTrek] Failed to load TanStack table-core');
+                return;
+            }}
+            window.TanStackTable = {{
+                createTable: mod.createTable,
+                getCoreRowModel: mod.getCoreRowModel,
+            }};
 
-                // Gene table class (global scope)
-                {gene_table_js}
-            }}).catch(function(err) {{
-                console.error('[GeneTrek] Failed to load TanStack:', err);
-            }});
+            // Gene table class (global scope)
+            {gene_table_js}
         }})();
         </script>
         """)

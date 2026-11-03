@@ -6,14 +6,19 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import (
+    FileResponse,
+    RedirectResponse,
+    Response,
+    StreamingResponse,
+)
 
 from genetrek_server import paths
 from genetrek_server.api.compare_routes import register_compare_routes
 from genetrek_server.api.errors import API_VERSION, ApiError, VersionedRoute
 from genetrek_server.api.lookup_routes import register_lookup_routes
 from genetrek_server.models.schemas import DataResponse
-from genetrek_server.services import lookup
+from genetrek_server.services import lookup, pending_downloads
 
 if TYPE_CHECKING:
     from genetrek_server.config.loader import AppConfig
@@ -129,6 +134,39 @@ def create_router(
             "database_release": config.release,
             "api_version": API_VERSION,
         }
+
+    return router
+
+
+def create_downloads_router(
+    store: pending_downloads.PendingDownloads | None = None,
+) -> APIRouter:
+    """The single-use links "Download current results" hands the browser.
+
+    Not under ``/api``: these are not an interface anyone calls, only the other
+    half of a button. See :mod:`genetrek_server.services.pending_downloads`.
+    """
+    pending = store or pending_downloads.PENDING
+    router = APIRouter(include_in_schema=False)
+
+    @router.get(pending_downloads.ROUTE + "/{token}")
+    def fetch_pending(token: str) -> Response:
+        """Hand over a file built by the page, once."""
+        file = pending.take(token)
+        if file is None:
+            raise HTTPException(
+                status_code=404,
+                detail="This download link has expired or was already used.",
+            )
+        return Response(
+            content=file.content,
+            media_type=file.media_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{file.filename}"',
+                "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
 
     return router
 

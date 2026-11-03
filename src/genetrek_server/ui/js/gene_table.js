@@ -1,7 +1,8 @@
 /**
  * GeneTrek TanStack Table wrapper.
  *
- * Depends on window.TanStackTable being set (from CDN import in the module header).
+ * Depends on window.TanStackTable being set (from the vendored table-core, see
+ * ui/components/gene_table.py).
  * Initialized via: new GeneTrekTable(containerId, options)
  *
  * Pagination is handled client-side (UI + state), but data is fetched from
