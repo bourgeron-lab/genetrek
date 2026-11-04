@@ -1003,8 +1003,8 @@ is_shet_constrained:
   primary_key: false
   added: "20260924"
   source_file: "GeneListForGeneTrek_20260904.txt"
-  derived_op: null
-  derived_from: []
+  derived_op: external
+  derived_from: [shet_mean, shet_lower]
   aliases: []
 loeuf:
   fullname: LOEUF
@@ -1087,8 +1087,8 @@ is_loeuf_gnomad_v4_1_1:
   primary_key: false
   added: "20260924"
   source_file: "GeneListForGeneTrek_20260904.txt"
-  derived_op: null
-  derived_from: []
+  derived_op: external
+  derived_from: [loeuf]
   aliases: []
 gnomad_gene_flags:
   fullname: gnomAD gene flags
@@ -1150,8 +1150,8 @@ constraint:
   primary_key: false
   added: "20260924"
   source_file: "GeneListForGeneTrek_20260904.txt"
-  derived_op: null
-  derived_from: []
+  derived_op: external
+  derived_from: [is_loeuf_gnomad_v4_1_1, is_shet_constrained]
   aliases: []
 eagle_score:
   fullname: EAGLE class

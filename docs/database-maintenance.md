@@ -466,6 +466,14 @@ Deliberate limits:
     exist.
   - The info dialog shows "computed from `<parent>` outside GeneTrek".
   - The `notebooks/brain_data/` notebooks set it on every flag they add.
+  - On an existing column: `genetrek-db set <field> --derived-from <parent>` (repeatable;
+    `--derived-from ""` clears it). A rule's sources are set by `derive`, so `set` refuses
+    one.
+  - **Compare reads it.** A list whose lineage reaches the covariate's column gets no
+    adjusted result for that covariate, because adjusting a list for the score it was cut
+    from is circular. So record the parent of every threshold flag:
+    `is_loeuf_gnomad_v4_1_1` ← `loeuf`, `is_shet_constrained` ← `shet_mean`, `shet_lower`,
+    and `constraint` ← both flags (2026-11-04).
 
 A roll-up may itself be a source for another roll-up — `schema.derived_order` sorts the
 dependency graph and refuses a cycle.

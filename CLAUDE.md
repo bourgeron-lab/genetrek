@@ -302,7 +302,9 @@ server imports it, never the reverse -- the client must install without FastAPI 
   after a source is refreshed. Sources must be boolean; nulls follow **Kleene** logic (a
   union is null unless some source is True or all are measured False). `save` never
   recomputes on its own. `derived_op: external` only records a parent (provenance) and is
-  never evaluated (`FieldMeta.is_rule` is False for it).
+  never evaluated (`FieldMeta.is_rule` is False for it); set it on an existing column with
+  `genetrek-db set <field> --derived-from <parent>`. Compare reads the lineage, so a
+  threshold flag must name the score it was cut from.
 - **Per-column licences**: every column declares `licence` (an SPDX id where one exists).
   Set it with `uv run genetrek-db set <field> --licence CC-BY-4.0`, then regenerate the file
   that ships with the code and the data deposits:
