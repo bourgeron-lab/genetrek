@@ -32,7 +32,20 @@ result = gt.compare([
 result.pairs        # overlap, odds ratio with exact 95% CI, Fisher p, FDR, adjusted
 result.methods      # the methods paragraph, with the database release
 result.to_request_json("request.json")   # gt.replay("request.json") later
+
+# Within the genes expressed in brain, adjusted for constraint and gene length
+gt.compare(["autism_genes", "epilepsy_genes"],
+           background="Brain-expressed protein-coding genes",
+           adjust_for=["LOEUF decile", "Gene length decile"])
+# Within a gene list, or within your own genes (at least 200)
+gt.compare(["autism_genes", "epilepsy_genes"], background=Set.field("hc_ndd"))
+gt.compare(["autism_genes", Set.file("hits.txt")], background=Set.file("panel.txt"))
 ```
+
+`gt.backgrounds()` lists the preset backgrounds, the covariates and the pairs that can
+be combined. A list cut from a covariate (a LOEUF threshold adjusted for LOEUF) gets no
+adjusted result: `result.pairs["adjusted_unavailable"]` says why, and
+`adjusted_caveat` flags a set the covariate largely determines.
 
 Tables are [polars](https://pola.rs) DataFrames; with the `pandas` extra, `table.to_pandas()`.
 A null means "not measured" and is never turned into `False`.
@@ -50,6 +63,8 @@ genetrek genes my_genes.txt --columns loeuf,hc_ndd   # TSV to stdout
 genetrek convert - --to hgnc,ensg < ids.txt
 genetrek search SHANK3 chr22:50674408-50733212
 genetrek compare hc_ndd my_genes.txt:mine --out results/
+genetrek compare autism_genes epilepsy_genes --background-set hc_ndd \
+    --adjust "LOEUF decile" --adjust "Gene length decile"
 genetrek replay results/request.json
 genetrek download -o genetrek.parquet
 genetrek --help
@@ -83,8 +98,9 @@ read locally: only its token is sent.
 
 Every result carries the database release it was computed on (`result.release`,
 `gt.release()`). The client checks the server's API version: `genes()`, `search()` and the
-error codes need API 1.1, which genetrek.pasteur.fr serves from GeneTrek v8; against an
-older server those methods raise `ServerTooOld`, and everything else works.
+error codes need API 1.1, and gene-set backgrounds and two covariates need 1.2;
+genetrek.pasteur.fr serves both from GeneTrek v8. Against an older server those calls
+raise `ServerTooOld`, and everything else works.
 
 ## Citing and licences
 

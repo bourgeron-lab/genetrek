@@ -128,3 +128,16 @@ def test_user_agent_names_the_package():
         agent = gt._http.headers["User-Agent"]
     assert agent.startswith("genetrek-python/")
     assert agent.endswith("mytool/1")
+
+
+@respx.mock
+def test_a_set_background_needs_api_1_2(gt):
+    from genetrek import Set  # noqa: PLC0415
+
+    respx.get(f"{URL}/api/health").mock(
+        return_value=httpx.Response(200, json={"api_version": "1.1"})
+    )
+    with pytest.raises(ServerTooOld, match="gene-set background"):
+        gt.compare(["a", "b"], background=Set.field("hc_ndd"))
+    with pytest.raises(ServerTooOld, match="two covariates"):
+        gt.compare(["a", "b"], adjust_for=["LOEUF decile", "Gene length decile"])
