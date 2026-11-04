@@ -550,6 +550,15 @@ def set_meta(
         bool,
         typer.Option("--touch", help="Set the update date to today."),
     ] = False,
+    derived_from: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--derived-from",
+            help="A column this one was computed from outside GeneTrek "
+            "(repeatable): recorded as derived_op 'external', never evaluated. "
+            "Lets Compare see that the two are related. Empty to clear.",
+        ),
+    ] = None,
     actor: Annotated[str | None, typer.Option("--actor")] = None,
     note: Annotated[str | None, typer.Option("--note")] = None,
 ) -> None:
@@ -582,6 +591,8 @@ def set_meta(
         from genetrek_server.schema import today_stamp  # noqa: PLC0415 - avoids a cycle
 
         changes["update"] = today_stamp()
+    if derived_from is not None:
+        changes.update(_external_parents(database, field, derived_from))
 
     if not changes:
         fail("nothing to change; pass at least one option")
@@ -594,6 +605,27 @@ def set_meta(
     out.print(database.diff().describe())
     result = save_or_fail(database, actor=actor, note=note)
     _report_save(database, result)
+
+
+def _external_parents(
+    database: Database, field: str, parents: list[str]
+) -> dict[str, Any]:
+    """The metadata change ``--derived-from`` asks for: parents, or none.
+
+    Only for provenance: a rule (``genetrek-db derive``) already names its
+    sources and is re-evaluated from them, so it is refused here.
+    """
+    meta = database.fields[field]
+    if meta.is_rule:
+        fail(f"{field!r} is a {meta.derived_op} rule; its sources are set by 'derive'")
+    wanted = list(dict.fromkeys(p for p in parents if p))
+    if not wanted:
+        return {"derived_op": None, "derived_from": []}
+    if unknown := [p for p in wanted if p not in database]:
+        fail(f"unknown field(s): {', '.join(unknown)}")
+    if field in wanted:
+        fail(f"{field!r} cannot be derived from itself")
+    return {"derived_op": "external", "derived_from": wanted}
 
 
 @app.command()

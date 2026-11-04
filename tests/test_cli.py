@@ -464,6 +464,33 @@ class TestSet:
         assert result.exit_code == 1
         assert "unknown field" in result.output
 
+    def test_records_an_external_parent(self, run, resources):
+        result = run(
+            "set", "flag_a", "--derived-from", "score", "--derived-from", "loeuf"
+        )
+        assert result.exit_code == 0, result.output
+        meta = Database.open(resources.root).fields["flag_a"]
+        assert meta.derived_op == "external"
+        assert meta.derived_from == ["score", "loeuf"]
+        assert not meta.is_rule
+
+    def test_clears_the_parents(self, run, resources):
+        run("set", "flag_a", "--derived-from", "score")
+        result = run("set", "flag_a", "--derived-from", "")
+        assert result.exit_code == 0, result.output
+        meta = Database.open(resources.root).fields["flag_a"]
+        assert meta.derived_op is None
+        assert meta.derived_from == []
+
+    @pytest.mark.parametrize(
+        ("parent", "message"),
+        [("nope", "unknown field"), ("flag_a", "derived from itself")],
+    )
+    def test_refuses_a_bad_parent(self, run, parent, message):
+        result = run("set", "flag_a", "--derived-from", parent)
+        assert result.exit_code == 1
+        assert message in result.output
+
     def test_sets_priority(self, run, resources):
         result = run("set", "score", "--priority", "5")
         assert result.exit_code == 0
