@@ -29,6 +29,8 @@ from genetrek import (
 )
 from genetrek import lists as codec
 
+from genetrek_server import backgrounds
+from genetrek_server.api import compare_routes
 from genetrek_server.api.errors import API_VERSION
 from genetrek_server.api.routes import create_router
 from genetrek_server.config.loader import load_config
@@ -39,7 +41,11 @@ BACKGROUNDS = {
         {"name": "Coding", "column": "gene_type", "equals": "protein-coding"},
         {"name": "All genes"},
     ],
-    "covariates": [{"name": "Score tertile", "column": "score", "bins": 3}],
+    "covariates": [
+        {"name": "Score tertile", "column": "score", "bins": 3},
+        {"name": "Length", "span": "hg38", "bins": 3, "joint_bins": 2},
+    ],
+    "combinations": [["Score tertile", "Length"]],
 }
 
 
@@ -50,6 +56,9 @@ def gt(aliased_resources, monkeypatch) -> GeneTrek:
         encoding="utf-8",
     )
     monkeypatch.setenv(ENV_VAR, str(aliased_resources.root))
+    # 20 synthetic genes: lower the floor so a gene list can be a background.
+    monkeypatch.setattr(compare_routes, "MIN_USER_BACKGROUND", 3)
+    monkeypatch.setattr(backgrounds, "MIN_USER_BACKGROUND", 3)
     app = FastAPI()
     app.include_router(create_router(load_config(aliased_resources.root)))
     return GeneTrek(http=TestClient(app))
@@ -170,6 +179,31 @@ class TestCompare:
             "include_genes": False,
             "adjust_for": [],
         }
+
+
+class TestBackgroundsAndCovariates:
+    def test_a_gene_list_as_background(self, gt):
+        result = gt.compare(
+            ["flag_b", ["GENE02", "GENE04"]],
+            background=Set.field("flag"),
+            adjust_for=[],
+        )
+        assert result.background["kind"] == "gene_list"
+        assert result.background["size"] == 10
+
+    def test_two_covariates_crossed(self, gt):
+        result = gt.compare(
+            ["flag_a", "flag_b"],
+            background="All genes",
+            adjust_for=["Score tertile", "Length"],
+        )
+        assert result.adjusted_for == ["Score tertile + Length"]
+        assert "adjusted_unavailable" in result.pairs.columns
+        assert "adjusted_caveat" in result.pairs.columns
+
+    def test_the_backgrounds_list_spans_and_pairs(self, gt):
+        info = gt.backgrounds()
+        assert info["combinations"] == [["Score tertile", "Length"]]
 
 
 class TestDownload:

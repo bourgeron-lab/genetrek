@@ -374,17 +374,30 @@ def _set(value: str) -> Set:
 
 
 @app.command()
-def compare(
+def compare(  # noqa: PLR0913 -- one Typer option each
     sets: Annotated[
         list[str],
         typer.Argument(
             help="2-12 sets: a gene list name, a file (path[:label]) or a share link."
         ),
     ],
-    background: Annotated[str | None, typer.Option()] = None,
-    adjust: Annotated[
+    background: Annotated[
+        str | None, typer.Option(help="A preset background, by name.")
+    ] = None,
+    background_set: Annotated[
         str | None,
-        typer.Option(help="Covariate to adjust for; 'none' for crude only."),
+        typer.Option(
+            "--background-set",
+            help="Run within a gene list instead: a name, a file (path[:label]) "
+            "or a share link, as for SET.",
+        ),
+    ] = None,
+    adjust: Annotated[
+        list[str] | None,
+        typer.Option(
+            help="Covariate to adjust for (repeat for two, crossed); 'none' for "
+            "crude only.",
+        ),
     ] = None,
     with_genes: Annotated[
         bool, typer.Option("--genes", help="List the genes of each region.")
@@ -396,12 +409,16 @@ def compare(
 ) -> None:
     """Compare gene sets as the Compare tab does; prints the pairs table."""
     built = [_set(value) for value in sets]
-    adjust_for = None if adjust is None else ([] if adjust == "none" else [adjust])
+    adjust_for = None if adjust is None else [a for a in adjust if a != "none"]
+    if background and background_set:
+        typer.echo("error: give --background or --background-set, not both", err=True)
+        raise typer.Exit(2)
+    within = _set(background_set) if background_set else background
     _run(
         lambda gt: _write(
             gt.compare(
                 built,
-                background=background,
+                background=within,
                 adjust_for=adjust_for,
                 include_genes=with_genes,
             ),

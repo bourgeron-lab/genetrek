@@ -53,6 +53,10 @@ def _pairs(pairs: list[dict[str, Any]]) -> pl.DataFrame:
                 "overlap_coefficient": pair.get("overlap_coefficient"),
                 "overlap_by_construction": pair.get("overlap_by_construction", ""),
                 "adjusted_for": adjusted.get("adjusted_for"),
+                # Why there is no adjusted result (a set defined from the
+                # covariate), or a caveat on the one given (API 1.2).
+                "adjusted_unavailable": pair.get("adjusted_unavailable", ""),
+                "adjusted_caveat": adjusted.get("caveat", ""),
                 "adjusted_odds_ratio": ratio(adjusted.get("odds_ratio")),
                 "adjusted_ci95_low": ratio(adj_low),
                 "adjusted_ci95_high": ratio(adj_high),

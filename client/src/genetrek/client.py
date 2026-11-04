@@ -442,23 +442,35 @@ class GeneTrek:
         self,
         sets: Sequence[Set | str | dict[str, Any] | Iterable[object]],
         *,
-        background: str | None = None,
+        background: str | Set | None = None,
         adjust_for: Sequence[str] | None = None,
         include_genes: bool = False,
     ) -> Comparison:
         """Compare 2 to 12 gene sets, as the Compare tab does.
 
         Each set is a :class:`Set`, a column name (a database gene list), or
-        identifiers. ``background`` defaults to the server's first;
-        ``adjust_for`` to its first covariate (``[]`` for none).
+        identifiers.
+
+        ``background`` is a preset's name (see :meth:`backgrounds`; the server's
+        first when unset), or a :class:`Set` to run the comparison within: a
+        database gene list (``Set.field("hc_ndd")``) or your own genes
+        (``Set.genes(...)``, ``Set.file(...)``, ``Set.lists(...)``), at least
+        200. ``adjust_for`` names up to two covariates (crossed); unset, the
+        server's first; ``[]`` for crude results only. A set background and two
+        covariates need API 1.2.
         """
         request: dict[str, Any] = {
             "sets": [Set.of(s).to_request() for s in sets],
             "include_genes": include_genes,
         }
-        if background is not None:
+        if isinstance(background, Set):
+            self._require((1, 2), "a gene-set background")
+            request["background"] = background.to_request()
+        elif background is not None:
             request["background"] = background
         if adjust_for is not None:
+            if len(adjust_for) > 1:
+                self._require((1, 2), "adjusting for two covariates")
             request["adjust_for"] = list(adjust_for)
         return self._compare(request)
 
