@@ -344,11 +344,14 @@ class CompareRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     sets: list[CompareSet] = Field(min_length=2, max_length=12)
-    #: A background name from ``GET /api/backgrounds``; the default when omitted.
-    background: str | None = None
-    #: Covariates to stratify by. Omitted: every configured covariate. ``[]``:
-    #: crude results only. One covariate at a time is supported.
-    adjust_for: list[str] | None = Field(None, max_length=1)
+    #: The universe: a preset's name from ``GET /api/backgrounds`` (the first
+    #: when omitted), or -- like a set -- a database gene list (``field``),
+    #: identifiers (``genes``), a My lists file or a share token. A supplied
+    #: list needs at least 200 genes.
+    background: str | CompareSet | None = None
+    #: Covariates to stratify by, at most two (crossed). Omitted: the first
+    #: configured covariate. ``[]``: crude results only.
+    adjust_for: list[str] | None = Field(None, max_length=2)
     #: Whether each region in the response lists its genes, not just counts them.
     include_genes: bool = False
 
@@ -363,6 +366,9 @@ Ratio = float | str | None
 
 class BackgroundInfo(BaseModel):
     name: str
+    #: ``preset`` (from backgrounds.yaml), ``gene_list`` (a database gene
+    #: list) or ``user`` (genes supplied with the request).
+    kind: str = "preset"
     definition: str
     description: str = ""
     size: int
@@ -375,8 +381,13 @@ class BackgroundInfo(BaseModel):
 
 class CovariateInfo(BaseModel):
     name: str
+    #: The column it bins, or ``""`` for a gene-length covariate (``span``).
     column: str
+    #: For gene length: the assembly whose coordinates give it.
+    span: str = ""
     bins: int
+    #: Bins used when crossed with a second covariate.
+    joint_bins: int = 5
     description: str = ""
     definition: str
 
@@ -384,6 +395,8 @@ class CovariateInfo(BaseModel):
 class BackgroundsResponse(BaseModel):
     backgrounds: list[BackgroundInfo]
     covariates: list[CovariateInfo]
+    #: Covariate pairs offered for a joint adjustment (``adjust_for``).
+    combinations: list[list[str]] = Field(default_factory=list)
 
 
 class CompareSetResult(BaseModel):
@@ -414,6 +427,9 @@ class AdjustedPairResult(BaseModel):
     p_value: float | None
     fdr: float | None
     strata_used: int
+    #: When the covariate largely determines one of the two sets (most of its
+    #: genes in strata it fills), why to read this result with care.
+    caveat: str = ""
 
 
 class ComparePairResult(BaseModel):
@@ -435,6 +451,9 @@ class ComparePairResult(BaseModel):
     #: Why the overlap is expected by construction, or empty.
     overlap_by_construction: str = ""
     adjusted: AdjustedPairResult | None = None
+    #: Why ``adjusted`` is null although the comparison has a covariate: one
+    #: of the sets is defined from the covariate, so adjusting is circular.
+    adjusted_unavailable: str = ""
 
 
 class CompareRegionResult(BaseModel):

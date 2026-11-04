@@ -210,10 +210,17 @@ def statistics_table(comparison: Comparison) -> pl.DataFrame:
 def _adjusted_columns(comparison: Comparison, pair: PairStat) -> dict[str, object]:
     """The stratified result, beside the crude one -- the gap is the point."""
     adj = pair.adjusted
-    if adj is None or not comparison.covariate:
+    if not comparison.covariate:
         return {}
+    if adj is None:
+        # Withheld by the covariate guard: say so rather than leave a gap.
+        return {
+            "adjusted_for": comparison.covariate,
+            "adjusted_note": pair.adjusted_note,
+        }
     return {
         "adjusted_for": comparison.covariate,
+        "adjusted_note": pair.adjusted_note,
         "mh_odds_ratio": _ratio(adj.odds_ratio),
         "mh_ci95_lower": _ratio(adj.ci_lower),
         "mh_ci95_upper": _ratio(adj.ci_upper),
@@ -278,15 +285,26 @@ def methods_text(
         f"were adjusted for the {k} tests with the Benjamini-Hochberg procedure.",
     ]
     if comparison.covariate:
+        adjusted = sum(1 for p in comparison.pairs if p.adjusted is not None)
+        crossed = "the combinations of " if len(comparison.covariate_names) > 1 else ""
         text.append(
             f"Because two gene lists can overlap through a shared gene property "
             f"rather than a shared biology, each pair was also tested within strata "
-            f"of {comparison.covariate} ({covariate_definition or 'see GeneTrek'}): "
+            f"of {crossed}{comparison.covariate} "
+            f"({covariate_definition or 'see GeneTrek'}): "
             f"Cochran-Mantel-Haenszel test with continuity correction, reporting the "
             f"Mantel-Haenszel common odds ratio with a Robins-Breslow-Greenland 95% "
             f"confidence interval. These p-values were adjusted separately, with "
-            f"the Benjamini-Hochberg procedure across the {k} pairs.",
+            f"the Benjamini-Hochberg procedure across the {adjusted} adjusted pairs.",
         )
+        if comparison.adjustment_notes:
+            text.append(
+                "The adjustment was checked for circularity: a set defined from a "
+                "covariate (by its recorded derivation) gets no adjusted result, and "
+                "a set with at least 20% of its genes in covariate strata it fills "
+                "(at least 95% of a stratum of 20 genes or more) is flagged. "
+                + " ".join(comparison.adjustment_notes),
+            )
     flagged = [p for p in comparison.pairs if p.construction]
     if flagged:
         listed = "; ".join(
@@ -321,8 +339,12 @@ def request_body(comparison: Comparison) -> dict[str, object]:
             sets.append({"label": gene_set.label, "genes": sorted(gene_set.genes)})
     return {
         "sets": sets,
-        "background": comparison.background,
-        "adjust_for": [comparison.covariate] if comparison.covariate else [],
+        "background": (
+            comparison.background_spec
+            if comparison.background_spec is not None
+            else comparison.background
+        ),
+        "adjust_for": list(comparison.covariate_names),
         "include_genes": False,
     }
 

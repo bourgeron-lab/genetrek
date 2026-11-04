@@ -27,7 +27,11 @@ import polars as pl
 import yaml
 
 from genetrek_server import paths, schema
-from genetrek_server.backgrounds import load_backgrounds, load_covariates
+from genetrek_server.backgrounds import (
+    load_backgrounds,
+    load_combinations,
+    load_covariates,
+)
 from genetrek_server.content import CONTENT_PAGES
 from genetrek_server.db import storage
 from genetrek_server.db.field import BoundField
@@ -1836,11 +1840,17 @@ class Database:
             columns,
         )
         report.warnings.extend(f"backgrounds.yaml: {p}" for p in background_problems)
-        _, covariate_problems = load_covariates(
+        covariates, covariate_problems = load_covariates(
             paths.backgrounds_path(self._resources),
             columns,
+            {name: (loc.start, loc.end) for name, loc in self.roles.assemblies.items()},
         )
         report.warnings.extend(f"backgrounds.yaml: {p}" for p in covariate_problems)
+        _, combination_problems = load_combinations(
+            paths.backgrounds_path(self._resources),
+            covariates,
+        )
+        report.warnings.extend(f"backgrounds.yaml: {p}" for p in combination_problems)
 
         try:
             categories = schema.load_categories_yaml(

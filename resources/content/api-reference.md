@@ -246,17 +246,40 @@ For `lists_file` and `share`, `list_index` (default 0) picks which list of
 several. Each set can take a `label`, used in the response and the methods text.
 Then:
 
-- `background`: the universe of genes, by name from `GET /api/backgrounds`.
-  Omitted means the default, protein-coding genes;
-- `adjust_for`: the covariate to stratify by, from `GET /api/backgrounds`.
-  Omitted means every configured covariate (LOEUF decile); `[]` means crude
-  results only. One covariate at a time;
+- `background`: the universe of genes. Either a preset by name from `GET
+  /api/backgrounds` (omitted means the default, protein-coding genes), or a gene
+  list given exactly as a set is (`field`, `genes`, `lists_file` or `share`, with
+  `label`). With `field` the universe is that list's genes; otherwise it is your
+  own, never stored, and replayed from `request.json` as its genes. A supplied
+  background needs at least 200 genes, and under 1,000 a warning says so;
+- `adjust_for`: the covariates to stratify by, from `GET /api/backgrounds`, at
+  most two. Omitted means the first configured one (LOEUF decile); `[]` means
+  crude results only. Two are crossed: each is cut into its `joint_bins` (5) and
+  every combination is a stratum;
 - `include_genes`: also list the genes in each region, not just count them.
 
 Two database lists, adjusted for constraint by default:
 
 ```
 {"sets": [{"field": "hc_ndd"}, {"field": "syngo_v1_3"}]}
+```
+
+Two lists within the genes expressed in brain, adjusted for constraint and gene
+length together:
+
+```
+{
+  "sets": [{"field": "autism_genes"}, {"field": "epilepsy_genes"}],
+  "background": "Brain-expressed protein-coding genes",
+  "adjust_for": ["LOEUF decile", "Gene length decile"]
+}
+```
+
+Two lists within a third, here the genes of the high-confidence NDD list, or
+within your own (`{"label": "My panel", "genes": [...]}`):
+
+```
+{"sets": [{"field": "autism_genes"}, {"field": "epilepsy_genes"}], "background": {"field": "hc_ndd"}}
 ```
 
 A list of your own against one, crude only, within all genes. Identifiers can be
@@ -277,7 +300,8 @@ mixed: `KIAA1650` is a former symbol of SHANK3, and `ENSG00000171862` is PTEN:
 
 - `release` and `key`: the database release and the key column genes are named
   by;
-- `background`: the name, definition and `size` of the background. It also gives
+- `background`: the name, `kind` (`preset`, `gene_list` or `user`), definition
+  and `size` of the background. It also gives
   `effective_size`, the N actually tested: the background less every gene that some
   set did not measure. `restricted_by` names the sets responsible (see
   [Comparing gene sets](/documentation)). When every set covers the whole
@@ -301,13 +325,18 @@ mixed: `KIAA1650` is a former symbol of SHANK3, and `ENSG00000171862` is PTEN:
   - `adjusted`, when a covariate applies: the Mantel–Haenszel `odds_ratio` and
     `ci95` (Robins–Breslow–Greenland), and the Cochran–Mantel–Haenszel `p_value`
     with its own `fdr`. See [Comparing gene sets](/documentation) for what
-    these mean;
+    these mean. Its `caveat` is set when the covariate largely determines one of
+    the two sets: at least 20% of its genes sit in strata it fills;
+  - `adjusted_unavailable`, the reason `adjusted` is null although a covariate
+    applies: one of the sets is defined from the covariate (a LOEUF threshold
+    adjusted for LOEUF), so adjusting it would be circular;
 - `regions`: every non-empty exclusive region (genes in exactly those sets), with
   its `size`, and its `genes` if asked for;
 - `methods`: the methods paragraph the browser's downloads carry. It names any
   coverage restriction and the resulting N;
 - `warnings`: anything to read before quoting the numbers, for instance that
-  coverage removed more than a fifth of the background.
+  coverage removed more than a fifth of the background, that a supplied background
+  is small, or which sets the covariate check caught.
 
 JSON has no infinity: an odds ratio or interval end that is infinite, because a
 cell of the table is zero, is the string `"Inf"`. A value that is undefined is
@@ -315,8 +344,9 @@ cell of the table is zero, is the string `"Inf"`. A value that is undefined is
 
 **Errors.** A request that cannot be answered as asked returns 422 with the
 reason: fewer than 2 or more than 12 sets, a set naming more than one source, an
-unknown field or background, a column that is not a gene list, a damaged link or
-file, or a list made for a database keyed differently.
+unknown field, background or covariate, a column that is not a gene list, a damaged
+link or file, a list made for a database keyed differently, or a supplied background
+under 200 genes (`invalid_background`).
 
 **Your lists are not kept.** The API stores nothing. A list sent in the body of
 `POST /api/compare` or `POST /api/convert` is used to compute the response and
@@ -324,8 +354,10 @@ then discarded. It is not written to disk or logged; access logs record the URL,
 not the body. This is the same promise **My lists** makes in the browser. See
 [My lists & your data](/my-lists).
 
-`GET /api/backgrounds` lists the backgrounds, with their definitions and sizes,
-and the covariates, with how their strata are built.
+`GET /api/backgrounds` lists the preset backgrounds, with their definitions and
+sizes; the covariates, with how their strata are built (a `column`, or `span` for
+gene length from an assembly's coordinates; `bins`, and `joint_bins` when
+crossed); and the `combinations` the Compare tab offers for a joint adjustment.
 
 ### Downloading everything
 
@@ -341,9 +373,10 @@ The whole table, every column, serialised on request.
 `GET /api/health` reports the server's `api_version`, and every `/api` response
 carries it in an `X-GeneTrek-API-Version` header. A minor version adds endpoints,
 fields or error codes and breaks nothing; a major version would break existing
-callers. This page describes version 1.1, which added `POST /api/genes`, `POST
+callers. This page describes version 1.2. Version 1.1 added `POST /api/genes`, `POST
 /api/search`, error codes and `database_release` (the database's release stamp,
-beside `release`, the build).
+beside `release`, the build); 1.2 added gene-list and supplied backgrounds, two
+covariates at once, and the covariate check (`adjusted_unavailable`, `caveat`).
 
 Every error is `{"detail": ..., "code": ...}`. `detail` is a message for people and
 may change; `code` is for programs and does not. A 422 for a malformed request keeps
@@ -363,6 +396,7 @@ FastAPI's list of problems in `detail`.
 | `unknown_genome` | The genome assembly is not one this database carries. |
 | `unknown_background` | No comparison background has this name. |
 | `unknown_covariate` | No covariate has this name. |
+| `invalid_background` | A supplied background cannot be used (too small, or unreadable). |
 | `invalid_set` | A comparison set cannot be read (see detail). |
 | `invalid_request` | The request body or parameters are malformed. |
 | `unavailable` | The server cannot do this now (see detail). |

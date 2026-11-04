@@ -74,7 +74,8 @@ Do not put a list you would not want recorded in a URL, for example the `GET`
 form of `/api/convert`. Web servers and proxies log URLs.
 
 When you download tables from the **Compare gene sets** tab, the file
-`request.json` contains the genes of every list you compared. It lets you, or a
+`request.json` contains the genes of every list you compared, and of your list
+used as the background, if you chose one. It lets you, or a
 reviewer, reproduce the comparison exactly. Share it as you would the list.
 
 ### When the database changes

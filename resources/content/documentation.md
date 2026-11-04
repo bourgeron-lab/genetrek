@@ -365,11 +365,25 @@ intersection, largest first, and a heatmap shows every pair.
 
 **Background.** Every set is first restricted to a background, the universe of
 genes the tests count. By default this is the protein-coding genes (the page
-shows how many), and it can be switched to all genes. The choice matters: most gene lists are
-protein-coding, and testing them against all genes, a third of which are
-pseudogenes, makes nearly any two lists look enriched in each other. Genes
-outside the background are left out, and the page says how many were dropped
-from each set. The enrichment in the **Statistics** panel uses the same
+shows how many). The choice matters: most gene lists are protein-coding, and
+testing them against all genes, a third of which are pseudogenes, makes nearly
+any two lists look enriched in each other. The background can be:
+
+- a preset: **protein-coding genes**; **brain-expressed protein-coding genes**
+  (a median of at least 1 TPM in one of the 10 GTEx v11 brain regions, about
+  14,600 genes), the fairer universe for brain questions, since a brain list
+  tested against every protein-coding gene is partly enriched for being
+  expressed at all; or **all genes**;
+- any **gene list in the database**: the comparison then runs among its genes,
+  for instance two disorder lists compared within the NDD genes;
+- one of **your own lists**, or the **current search results**: the genes a
+  sequencing panel covers, say, or those expressed in your own data. Like every
+  list of yours, it stays in your browser; sent to the API, it travels in the
+  request body and is not kept.
+
+A gene-list or personal background needs at least 200 genes, and below 1,000 the
+page warns that the intervals will be wide. Genes outside the background are left
+out, and the page says how many were dropped from each set. The enrichment in the **Statistics** panel uses the same
 backgrounds, with its own selector. Its **Open in Compare** button opens this tab
 with the current results and the chosen list already selected.
 
@@ -421,7 +435,7 @@ tested correctly outside GeneTrek too.
 Very small p-values cannot be computed below about 10⁻³⁰⁰; they are reported as
 "< 1e-300", never as 0.
 
-**Adjusting for constraint.** Restricting to protein-coding genes removes one
+**Adjusting for constraint and gene length.** Restricting to protein-coding genes removes one
 bias, and the same problem remains one level down. Neurodevelopmental gene lists
 are dominated by genes intolerant to loss of function, and so are synaptic,
 chromatin and many other brain-related lists. Two such lists overlap more than
@@ -430,13 +444,25 @@ the release built on HGNC 2026-09-18, High-confidence NDD v7 and SynGO v1.3 have
 an odds ratio of 2.8 within protein-coding genes, but 1.7 once constraint is
 accounted for.
 
-So every pair is also tested **within strata of LOEUF**, the gnomAD constraint
-metric:
+So every pair is also tested **within strata of a covariate**, by default LOEUF,
+the gnomAD constraint metric. **Adjust for** also offers:
+
+- **sHet** (GeneBayes), another measure of constraint. It ranks genes much as
+  LOEUF does (rank correlation −0.78), so it is an alternative, not an
+  addition;
+- **gene length**, the genomic span in GRCh38. Long genes collect more de novo
+  variants, so lists built from burden analyses lean towards them: autism genes
+  span a median 101 kb, protein-coding genes 29 kb;
+- **a constraint score with gene length**, crossed: each is cut into five bins
+  and every combination is a stratum (25, plus genes missing either value);
+- **no adjustment**.
+
+How the strata are built:
 
 - the genes of the analysed universe (the background, less any gene a set did not
-  measure) are split into ten deciles of LOEUF. The deciles are computed within
-  that universe, so they stay balanced when coverage shrinks it. The genes with no
-  LOEUF form one more stratum;
+  measure) are split into ten quantile bins of the covariate (deciles). The bins
+  are computed within that universe, so they stay balanced when coverage, or a
+  narrow background, shrinks it. The genes with no value form one more stratum;
 - the pair is then tested with the **Cochran–Mantel–Haenszel** test (with
   continuity correction), which compares the sets within each stratum and pools
   the evidence;
@@ -451,8 +477,22 @@ Compare them:
 - A pair whose association largely disappears was mostly two lists of
   constrained genes.
 
-The adjustment is only as good as LOEUF as a measure of constraint, and genes
-without a LOEUF value are compared among themselves.
+The adjustment is only as good as its covariate as a measure of what it stands
+for, and genes without a value are compared among themselves.
+
+**When the adjustment would be circular.** Adjusting a list for the score it was
+cut from means nothing: "LOEUF score < 0.45" fills the lowest LOEUF deciles, so
+within each stratum it is all or nothing. GeneTrek checks this two ways:
+
+- **from the metadata**: a database list recorded as derived from the covariate,
+  directly or through other lists (the constrained-gene flags from LOEUF or sHet),
+  gets **no adjusted result** for that covariate. The table says why, and the
+  heatmap marks the cell *n/a*;
+- **from the data**, for any set, your own lists included: when at least 20% of
+  its genes sit in covariate strata it fills (95% or more of a stratum of at least
+  20 genes), the covariate largely decides its membership. Its adjusted results are
+  kept but flagged (\* in the heatmap), because they rest on the strata it does
+  not fill. Curated NDD lists fill none.
 
 **Reading the heatmap.** The heatmap shows one of three measures for every pair,
 chosen above it. Each answers a different question, and a short explanation of
@@ -469,8 +509,10 @@ the selected one is printed under the heatmap:
   **more** genes than expected and negative (orange) when they share **fewer**:
   ±1.3 is FDR 0.05, ±2 is 0.01, ±3 is 0.001. ±>300 means beyond what can be
   computed. The scale is diverging and centred on zero, so depletion is never
-  mistaken for enrichment. By default it shows the result **adjusted for
-  constraint**; a checkbox above the figures switches it to the crude result.
+  mistaken for enrichment. By default it shows the result **adjusted** for the
+  chosen covariate; a checkbox above the figures switches it to the crude result.
+  *n/a* marks a pair with no adjusted result, and \* one whose adjusted result
+  rests on part of the strata (see above).
   A large overlap between two large lists can be highly significant and still
   be modest in size, so read it alongside the Jaccard index or the fold
   enrichment.

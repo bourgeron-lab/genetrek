@@ -337,3 +337,57 @@ def test_every_column_declares_a_licence(real_fields):
     """No column ships without stating the terms it is redistributed under."""
     missing = [name for name, meta in real_fields.items() if not meta.licence]
     assert not missing, missing
+
+
+@pytest.fixture(scope="module")
+def compare(real_resources):
+    from fastapi import FastAPI  # noqa: PLC0415
+    from fastapi.testclient import TestClient  # noqa: PLC0415
+
+    from genetrek_server.api.routes import create_router  # noqa: PLC0415
+    from genetrek_server.config.loader import load_config  # noqa: PLC0415
+
+    app = FastAPI()
+    app.include_router(create_router(load_config(real_resources)))
+    client = TestClient(app)
+
+    def run(*fields: str, **extra: object) -> dict:
+        body = {"sets": [{"field": f} for f in fields], **extra}
+        response = client.post("/api/compare", json=body)
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    return run
+
+
+class TestCovariateGuard:
+    """The constraint flags record their parents, so Compare never adjusts a
+    LOEUF threshold for LOEUF -- and a curated list keeps its adjusted result."""
+
+    @pytest.mark.parametrize(
+        ("flag", "covariate"),
+        [
+            ("is_loeuf_gnomad_v4_1_1", "LOEUF decile"),
+            ("constraint", "LOEUF decile"),
+            ("is_shet_constrained", "sHet decile"),
+        ],
+    )
+    def test_a_flag_is_not_adjusted_for_its_own_score(self, compare, flag, covariate):
+        (pair,) = compare("hc_ndd", flag, adjust_for=[covariate])["pairs"]
+        assert pair["adjusted"] is None
+        assert "circular" in pair["adjusted_unavailable"]
+
+    def test_curated_lists_keep_their_adjusted_result(self, compare):
+        (pair,) = compare("hc_ndd", "autism_genes")["pairs"]
+        assert pair["adjusted"] is not None
+        assert pair["adjusted"]["caveat"] == ""
+
+    def test_the_brain_preset_is_a_subset_of_coding_genes(self, compare):
+        coding = compare("hc_ndd", "autism_genes", adjust_for=[])
+        brain = compare(
+            "hc_ndd",
+            "autism_genes",
+            adjust_for=[],
+            background="Brain-expressed protein-coding genes",
+        )
+        assert 0 < brain["background"]["size"] < coding["background"]["size"]

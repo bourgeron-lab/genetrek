@@ -28,6 +28,12 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 from nicegui import ui
 
+from genetrek_server.backgrounds import (
+    MIN_USER_BACKGROUND,
+    background_warning,
+    gene_list_background,
+    user_background,
+)
 from genetrek_server.services import compare as cmp
 from genetrek_server.services import compare_export as export
 from genetrek_server.services import compare_figures as figures
@@ -44,6 +50,9 @@ _NAVY = "#1a365d"
 _RESULTS = "results"
 _DB = "db:"
 _LIST = "list:"
+#: Background choices that are presets from backgrounds.yaml; any other choice
+#: is a set id (a database list, a My list, the current results).
+_PRESET = "preset:"
 #: Genes listed by name in the region panel before "and N more".
 _PREVIEW = 40
 #: Stands in for an infinite odds ratio, which JSON cannot carry.
@@ -76,18 +85,21 @@ class CompareView:
         self.selected: list[str] = []
         self.labels: dict[str, str] = {}
         self.background: Background = config.backgrounds[0]
+        #: The background as chosen: ``preset:<name>`` or a set id.
+        self.background_choice = f"{_PRESET}{self.background.name}"
+        #: How a reproduction asks for that background (``request.json``).
+        self.background_spec: str | dict[str, object] = self.background.name
         self.main_kind = "venn"
         self.heatmap_metric: figures.HeatmapMetric = "jaccard"
-        #: The covariate comparisons are stratified by -- the first configured
-        #: one -- and whether the heatmap shows the stratified result. The
-        #: statistics table always shows both.
-        self.covariate: Covariate | None = (
-            config.covariates[0] if config.covariates else None
-        )
-        self.adjust = self.covariate is not None
-        #: Keyed by background and the partial-coverage columns compared: the
-        #: strata are computed within the analysed universe, which they shrink.
-        self._strata: dict[tuple[str, tuple[str, ...]], dict[str, str]] = {}
+        #: The covariates comparisons are stratified by -- the first configured
+        #: one, or a declared pair, or none -- and whether the heatmap shows the
+        #: stratified result. The statistics table always shows both.
+        self.covariates: list[Covariate] = config.covariates[:1]
+        self.adjust = bool(self.covariates)
+        #: Keyed by preset background, covariates and the partial-coverage
+        #: columns compared: the strata are computed within the analysed
+        #: universe, which they shrink. A list background is never cached.
+        self._strata: dict[tuple[str, str, tuple[str, ...]], dict[str, str]] = {}
         self.comparison: cmp.Comparison | None = None
         #: (members, exclusive) of the selected region, or None.
         self.region: tuple[tuple[int, ...], bool] | None = None
@@ -202,12 +214,22 @@ class CompareView:
         )
 
     def _universe(self) -> frozenset[str]:
+        if self.background.genes is not None:
+            return self.background.genes
         name = self.background.name
         if name not in self._universes and self.key is not None:
             self._universes[name] = cmp.keys_where(
                 self.config.df.filter(self.background.expr())[self.key],
             )
         return self._universes.get(name, frozenset())
+
+    def _background_options(self) -> dict[str, str]:
+        """The presets, then every set that can serve as the universe instead."""
+        options = {f"{_PRESET}{b.name}": b.name for b in self.config.backgrounds}
+        options.update(
+            {set_id: f"Within · {text}" for set_id, text in self._available().items()},
+        )
+        return options
 
     def _sources_changed(self) -> None:
         """A search or a list changed: re-offer, drop what vanished, recompute."""
@@ -217,6 +239,15 @@ class CompareView:
         if kept != self.selected:
             self.selected = kept
             self.picker.set_value(kept)
+        backgrounds = self._background_options()
+        self.background_select.set_options(backgrounds)
+        if self.background_choice not in backgrounds:
+            self.background_select.set_value(
+                f"{_PRESET}{self.config.backgrounds[0].name}"
+            )
+        elif not self.background_choice.startswith(_PRESET):
+            # The list or the results it was made from may have changed.
+            self._set_background(self.background_choice, refresh=False)
         self.stale = True
         if self.visible:
             self.refresh()
@@ -232,7 +263,7 @@ class CompareView:
                 "Pick 2 to 12 sets: the current search results, any gene list in "
                 "the database, or your own lists.",
             ).classes("text-sm text-grey-8")
-            with ui.row().classes("w-full items-start gap-4 no-wrap"):
+            with ui.row().classes("w-full items-start gap-4"):
                 self.picker = (
                     ui.select(
                         self._available(),
@@ -246,26 +277,43 @@ class CompareView:
                 )
                 self.background_select = (
                     ui.select(
-                        [b.name for b in self.config.backgrounds],
-                        value=self.background.name,
+                        self._background_options(),
+                        value=self.background_choice,
                         label="Background",
                         on_change=lambda e: self._set_background(e.value),
                     )
                     .props("outlined")
-                    .style("min-width: 220px;")
-                    .tooltip("The genes counted as the universe for every test")
+                    .style("min-width: 260px;")
+                    .tooltip(
+                        "The genes counted as the universe for every test: a preset, "
+                        "or any gene list, one of your lists or the current results "
+                        f"(at least {MIN_USER_BACKGROUND} genes)",
+                    )
                 )
-            if self.covariate is not None:
+                if self.config.covariates:
+                    self.covariate_select = (
+                        ui.select(
+                            self._covariate_options(),
+                            value=" + ".join(c.name for c in self.covariates),
+                            label="Adjust for",
+                            on_change=lambda e: self._set_covariates(e.value or ""),
+                        )
+                        .props("outlined")
+                        .style("min-width: 220px;")
+                        .tooltip(
+                            "Gene lists rich in constrained (or long) genes overlap "
+                            "partly for that reason alone. The adjusted test compares "
+                            "them within strata of the covariate "
+                            "(Cochran-Mantel-Haenszel).",
+                        )
+                    )
+            if self.config.covariates:
                 ui.checkbox(
-                    f"Colour the heatmap by the result adjusted for "
-                    f"{self.covariate.name} (the table always shows both)",
+                    "Colour the heatmap by the adjusted result "
+                    "(the table always shows both)",
                     value=self.adjust,
                     on_change=lambda e: self._set_adjust(value=bool(e.value)),
-                ).props("dense").classes("text-sm").tooltip(
-                    "Gene lists rich in constrained genes overlap partly for that "
-                    "reason alone. The adjusted test compares them within strata of "
-                    "the covariate (Cochran-Mantel-Haenszel).",
-                )
+                ).props("dense").classes("text-sm")
             self.label_row = ui.row().classes("w-full items-center gap-2")
 
     def _render_label_inputs(self) -> None:
@@ -303,11 +351,54 @@ class CompareView:
         self._render_label_inputs()
         self.refresh()
 
-    def _set_background(self, name: str) -> None:
-        self.background = next(
-            (b for b in self.config.backgrounds if b.name == name),
-            self.config.backgrounds[0],
+    def _set_background(self, choice: str, *, refresh: bool = True) -> None:
+        """Use a preset, or a set's genes, as the universe."""
+        if choice.startswith(_PRESET):
+            name = choice.removeprefix(_PRESET)
+            self.background = next(
+                (b for b in self.config.backgrounds if b.name == name),
+                self.config.backgrounds[0],
+            )
+            self.background_spec = self.background.name
+        else:
+            label = self._default_label(choice)
+            genes = self._genes(choice)
+            try:
+                if choice.startswith(_DB):
+                    if len(genes) < MIN_USER_BACKGROUND:
+                        msg = (
+                            f"a background needs at least {MIN_USER_BACKGROUND} "
+                            f"genes; {label!r} has {len(genes)}"
+                        )
+                        raise ValueError(msg)  # noqa: TRY301 -- one message for both
+                    self.background = gene_list_background(label, genes)
+                    self.background_spec = {"field": choice.removeprefix(_DB)}
+                else:
+                    self.background = user_background(label, genes)
+                    self.background_spec = {"label": label, "genes": sorted(genes)}
+            except ValueError as exc:
+                ui.notify(f"Not used as the background: {exc}.", type="warning")
+                self.background_select.set_value(self.background_choice)
+                return
+        self.background_choice = choice
+        if refresh:
+            self.refresh()
+
+    def _covariate_options(self) -> dict[str, str]:
+        """No adjustment, each covariate, and each declared pair."""
+        options = {"": "No adjustment"}
+        options.update({c.name: c.name for c in self.config.covariates})
+        options.update(
+            {
+                " + ".join(pair): " + ".join(pair)
+                for pair in self.config.covariate_combinations
+            },
         )
+        return options
+
+    def _set_covariates(self, value: str) -> None:
+        by_name = {c.name: c for c in self.config.covariates}
+        self.covariates = [by_name[n] for n in value.split(" + ") if n in by_name]
         self.refresh()
 
     def _set_label(self, set_id: str, value: str) -> None:
@@ -343,24 +434,33 @@ class CompareView:
         self.stale = False
 
     def _strata_map(self, sets: list[cmp.GeneSet]) -> dict[str, str] | None:
-        """Gene -> stratum of the covariate, within the analysed universe."""
-        if self.covariate is None or self.key is None:
+        """Gene -> stratum of the covariates, within the analysed universe."""
+        if not self.covariates or self.key is None:
             return None
         partial = tuple(
             sorted(s.column for s in sets if s.measured is not None and s.column)
         )
-        cache_key = (self.background.name, partial)
-        if cache_key not in self._strata:
-            analysed = cmp.effective_universe(sets, self._universe())
-            self._strata[cache_key] = cmp.strata_for(
-                self.config.df.filter(
-                    pl.col(self.key).cast(pl.String).is_in(list(analysed)),
-                ),
-                self.key,
-                self.covariate.column,
-                self.covariate.bins,
-            )
-        return self._strata[cache_key]
+        names = " + ".join(c.name for c in self.covariates)
+        cache_key = (self.background_choice, names, partial)
+        cached = self.background_choice.startswith(_PRESET)
+        if cached and cache_key in self._strata:
+            return self._strata[cache_key]
+        analysed = cmp.effective_universe(sets, self._universe())
+        frame = self.config.df.filter(
+            pl.col(self.key).cast(pl.String).is_in(list(analysed)),
+        )
+        crossed = len(self.covariates) > 1
+        strata = cmp.joint_strata(
+            [
+                cmp.strata_for(
+                    frame, self.key, c.expr(), c.joint_bins if crossed else c.bins
+                )
+                for c in self.covariates
+            ],
+        )
+        if cached:
+            self._strata[cache_key] = strata
+        return strata
 
     def _set_adjust(self, *, value: bool) -> None:
         self.adjust = value
@@ -385,7 +485,14 @@ class CompareView:
                 self.config.field_aliases,
             ),
             strata=self._strata_map(sets),
-            covariate=self.covariate.name if self.covariate else "",
+            covariate=" + ".join(c.name for c in self.covariates),
+            defined=cmp.defined_from(
+                sets,
+                self.config.fields,
+                [c.column for c in self.covariates if c.column],
+            ),
+            covariate_names=[c.name for c in self.covariates],
+            background_spec=self.background_spec,
         )
 
     @ui.refreshable_method
@@ -430,6 +537,9 @@ class CompareView:
         ]
         if comparison.coverage_warning:
             notes.append(f"Warning: {comparison.coverage_warning}")
+        if small := background_warning(self.background):
+            notes.append(f"Warning: {small}")
+        notes += [f"Adjustment: {note}" for note in comparison.adjustment_notes]
         if any(not s.genes for s in comparison.sets):
             notes.append("A set with no genes in the background cannot be compared.")
         if notes:
@@ -603,11 +713,12 @@ class CompareView:
                         "adj_fdr": p.adjusted.fdr,
                     }
                     if p.adjusted is not None
-                    else {}
+                    # Withheld by the covariate guard: n/a, not a blank.
+                    else {"adj_or": None, "adj_ci": "n/a", "adj_fdr": None}
                 ),
                 "jaccard": number(p.jaccard, 3),
                 "ocoef": number(p.overlap_coefficient, 3),
-                "note": p.construction,
+                "note": "; ".join(n for n in (p.construction, p.adjusted_note) if n),
             }
             for p in comparison.pairs
         ]
@@ -826,7 +937,10 @@ class CompareView:
             release=self.config.release,
             background_definition=self.background.describe(),
             today=date.today(),  # noqa: DTZ011
-            covariate_definition=self.covariate.describe() if self.covariate else "",
+            covariate_definition="; ".join(
+                c.describe(bins=c.joint_bins if len(self.covariates) > 1 else c.bins)
+                for c in self.covariates
+            ),
         )
         return tables, methods
 
