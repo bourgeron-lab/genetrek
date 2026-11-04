@@ -94,7 +94,10 @@ HEATMAP_EXPLANATIONS: dict[str, str] = {
         "when the sets share more genes than expected, negative (orange) when "
         "fewer**. \u00b11.3 is FDR 0.05, \u00b12 is 0.01, \u00b13 is 0.001; "
         "\u00b1>300 is beyond what can be computed. It measures *evidence*, not "
-        "size: a modest overlap between two large lists can score very high."
+        "size: a modest overlap between two large lists can score very high. "
+        "Coloured by the adjusted result, **n/a** marks a pair with a set defined "
+        "from the covariate (adjusting it would be circular), and **\\*** one where "
+        "the covariate largely determines a set."
     ),
 }
 
@@ -541,7 +544,21 @@ def upset_figure(comparison: Comparison, style: FigureStyle = SCREEN) -> go.Figu
 # -- pairwise heatmap -------------------------------------------------------------
 
 
+def _withheld(pair: PairStat, metric: str, *, adjusted: bool) -> bool:
+    """Whether the adjusted value was asked for but withheld by the guard."""
+    return (
+        adjusted
+        and metric == "signed_neg_log10_fdr"
+        and pair.adjusted is None
+        and bool(pair.adjusted_note)
+    )
+
+
 def _metric(pair: PairStat, metric: str, *, adjusted: bool) -> float:
+    if _withheld(pair, metric, adjusted=adjusted):
+        # Never the crude value in its place: the cell would claim a
+        # stratified result that does not exist.
+        return float("nan")
     if metric == "signed_neg_log10_fdr":
         use = pair.adjusted if adjusted and pair.adjusted is not None else None
         fdr = use.fdr if use is not None else pair.fdr
@@ -580,6 +597,10 @@ def heatmap_figure(
         if signed and abs(value) >= 300:  # noqa: PLR2004
             # The test underflows below ~1e-300: 300 is a floor, not a value.
             label = ">300" if value > 0 else "<\u2212300"
+        if _withheld(pair, metric, adjusted=adjusted):
+            label = "n/a"
+        elif signed and adjusted and pair.adjusted is not None and pair.adjusted_note:
+            label += "*"
         if pair.construction:
             label += "†"
             flagged = True
@@ -717,6 +738,8 @@ def alt_text(
     for pair in comparison.pairs:
         value = _metric(pair, metric, adjusted=adjusted)
         shown = "not defined" if math.isnan(value) else f"{value:.2f}"
+        if _withheld(pair, metric, adjusted=adjusted):
+            shown = "not adjusted (a set is defined from the covariate)"
         note = " (overlap by construction)" if pair.construction else ""
         cells.append(f"{sets[pair.a].label} and {sets[pair.b].label}: {shown}{note}")
     reading = (

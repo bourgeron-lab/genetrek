@@ -13,6 +13,7 @@ from typing import ClassVar
 
 import polars as pl
 import pytest
+import yaml
 from scipy import stats
 from scipy.stats.contingency import odds_ratio
 
@@ -20,6 +21,7 @@ from genetrek_server.backgrounds import (
     EVERY_GENE,
     Background,
     load_backgrounds,
+    load_combinations,
     load_covariates,
     parse_backgrounds,
     parse_covariates,
@@ -47,6 +49,17 @@ def gene_set(label: str, genes, column: str | None = None) -> cmp.GeneSet:
 A = gene_set("A", range(20))  # 20 genes
 B = gene_set("B", range(10, 40))  # 30 genes, 10 shared with A
 C = gene_set("C", range(35, 45))  # 10 genes, 5 shared with B, none with A
+
+
+def _shipped_columns() -> list[str]:
+    """The real database's columns, as the shipped metadata declares them."""
+    yaml_path = (
+        Path(__file__).parent.parent
+        / "resources"
+        / "config"
+        / "fields_description.yaml"
+    )
+    return list(yaml.safe_load(yaml_path.read_text(encoding="utf-8")))
 
 
 class TestFisher:
@@ -281,9 +294,10 @@ class TestBackgrounds:
         path = root / "config" / "backgrounds.yaml"
         if not path.is_file():
             pytest.skip("no shipped backgrounds.yaml")
-        backgrounds, problems = load_backgrounds(path, ["hgnc_locus_group"])
+        backgrounds, problems = load_backgrounds(path, _shipped_columns())
         assert problems == []
         assert backgrounds[-1].column is None
+        assert backgrounds[-1].where == ()
 
     def test_the_loader_exposes_them(self, resources):
         config = load_config(resources.root)
@@ -349,9 +363,14 @@ class TestCovariates:
         )
         if not path.is_file():
             pytest.skip("no shipped backgrounds.yaml")
-        covariates, problems = load_covariates(path, ["loeuf"])
+        covariates, problems = load_covariates(
+            path, _shipped_columns(), {"GRCh38": ("grch38_start", "grch38_end")}
+        )
         assert problems == []
         assert covariates[0].column == "loeuf"
+        combinations, problems = load_combinations(path, covariates)
+        assert problems == []
+        assert all(len(pair) == 2 for pair in combinations)
 
 
 class TestStratified:

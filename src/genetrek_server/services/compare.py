@@ -49,6 +49,16 @@ MAX_VENN_SETS = 5
 #: warns: past this, one low-coverage set has reshaped every pair.
 COVERAGE_WARNING_SHARE = 0.2
 
+#: A set fills a covariate stratum when it holds at least this share of it.
+FILLED_SHARE = 0.95
+#: Strata smaller than this never count as filled: filling three genes says little.
+MIN_FILLED_STRATUM = 20
+#: When at least this share of a set's genes sit in strata it fills, the
+#: covariate largely decides membership and its adjusted result gets a caveat.
+#: Measured on protein-coding genes with LOEUF deciles: 65% for the LOEUF < 0.45
+#: flag, 38% for the LOEUF-or-sHet flag, 0% for every curated NDD list.
+DETERMINED_SHARE = 0.2
+
 
 @dataclass(frozen=True)
 class GeneSet:
@@ -115,6 +125,10 @@ class PairStat:
     construction: str = ""
     #: The same pair stratified by the comparison's covariate, if it has one.
     adjusted: AdjustedStat | None = None
+    #: About the adjusted result: why there is none although the comparison
+    #: has a covariate (a set is defined from it), or a caveat on the one
+    #: given (the covariate largely decides a set's membership). ``""`` else.
+    adjusted_note: str = ""
 
     @property
     def enriched(self) -> bool:
@@ -167,6 +181,13 @@ class Comparison:
     not_measured: tuple[int, ...] = ()
     #: Labels of the sets whose coverage shrank the universe.
     restricted_by: tuple[str, ...] = ()
+    #: One sentence per set the covariate guard caught, for the warnings.
+    adjustment_notes: tuple[str, ...] = ()
+    #: The covariates the strata cross, by name (``covariate`` is their label).
+    covariate_names: tuple[str, ...] = ()
+    #: How the background was asked for, to replay it: a preset's name, a
+    #: database list (``{"field": ...}``) or supplied genes. ``None``: by name.
+    background_spec: str | Mapping[str, object] | None = None
 
     @property
     def coverage_loss(self) -> int:
@@ -341,7 +362,7 @@ def effective_universe(
 def strata_for(
     frame: pl.DataFrame,
     key: str,
-    column: str,
+    column: str | pl.Expr,
     bins: int,
 ) -> dict[str, str]:
     """Gene key -> stratum: ``bins`` quantile bins of ``column``, plus ``"none"``.
@@ -352,10 +373,15 @@ def strata_for(
     and the strata stay balanced when coverage shrinks the background. Ties are kept in one bin, so a heavily tied column
     may yield fewer bins. Genes with no value form their own stratum rather than
     being dropped -- 1,490 of the protein-coding genes have no LOEUF.
+
+    ``column`` is a column name or an expression over the frame (a gene's
+    length, from its coordinates).
     """
     values = frame.select(
         pl.col(key).cast(pl.String).alias("_key"),
-        pl.col(column).cast(pl.Float64).alias("_value"),
+        (pl.col(column) if isinstance(column, str) else column)
+        .cast(pl.Float64)
+        .alias("_value"),
     )
     known = values.filter(
         pl.col("_value").is_not_null() & pl.col("_value").is_not_nan()
@@ -370,6 +396,97 @@ def strata_for(
     for gene in values["_key"]:
         strata.setdefault(gene, "none")
     return strata
+
+
+def joint_strata(maps: Sequence[Mapping[str, str]]) -> dict[str, str]:
+    """Strata of several covariates at once: one stratum per combination.
+
+    ``"q2|q4"`` is the second bin of the first covariate and the fourth of the
+    second. A gene with no value for any of them goes to ``"none"``, as it does
+    for one covariate.
+    """
+    if len(maps) == 1:
+        return dict(maps[0])
+    return {
+        gene: (
+            "none"
+            if any(m.get(gene, "none") == "none" for m in maps)
+            else "|".join(m[gene] for m in maps)
+        )
+        for gene in maps[0]
+    }
+
+
+def defined_from(
+    sets: Sequence[GeneSet],
+    fields: Mapping[str, FieldMeta],
+    covariate_columns: Sequence[str],
+) -> dict[int, str]:
+    """Sets whose column is the covariate's, or descends from it: set -> column.
+
+    Read from the metadata (``derived_from``), so only database lists can be
+    caught here; :func:`filled_share` catches the rest from the data.
+    """
+    found: dict[int, str] = {}
+    for index, gene_set in enumerate(sets):
+        if gene_set.column is None:
+            continue
+        lineage = {gene_set.column, *_ancestors(gene_set.column, fields)}
+        hit = next((c for c in covariate_columns if c in lineage), None)
+        if hit is not None:
+            found[index] = hit
+    return found
+
+
+def filled_share(
+    genes: frozenset[str],
+    groups: Mapping[str, frozenset[str]],
+) -> float:
+    """The share of ``genes`` in strata they fill (:data:`FILLED_SHARE`).
+
+    High for a list cut from the covariate itself -- a LOEUF threshold fills
+    the lowest LOEUF deciles -- and zero for a list that merely leans on it.
+    """
+    if not genes:
+        return 0.0
+    filled = 0
+    for name, members in groups.items():
+        if name == "none" or len(members) < MIN_FILLED_STRATUM:
+            continue
+        inside = len(genes & members)
+        if inside / len(members) >= FILLED_SHARE:
+            filled += inside
+    return filled / len(genes)
+
+
+def _guard(
+    sets: Sequence[GeneSet],
+    groups: Mapping[str, frozenset[str]],
+    *,
+    covariate: str,
+    defined: Mapping[int, str],
+) -> tuple[dict[int, str], dict[int, str]]:
+    """Sets whose adjusted results are withheld, and sets that get a caveat."""
+    withheld = {
+        i: (
+            f"{sets[i].label} is defined from {column}, which the adjustment for "
+            f"{covariate} stratifies on: adjusting it would be circular, so its "
+            f"pairs have no adjusted result"
+        )
+        for i, column in defined.items()
+    }
+    caveats: dict[int, str] = {}
+    for i, gene_set in enumerate(sets):
+        if i in withheld:
+            continue
+        share = filled_share(gene_set.genes, groups)
+        if share >= DETERMINED_SHARE:
+            caveats[i] = (
+                f"{covariate} largely determines {gene_set.label}: {share:.0%} of "
+                f"its genes are in strata it fills, so its adjusted odds ratios rest "
+                f"on the remaining strata"
+            )
+    return withheld, caveats
 
 
 def _adjusted(
@@ -398,6 +515,9 @@ def compare(  # noqa: PLR0913
     construction: Mapping[tuple[int, int], str] | None = None,
     strata: Mapping[str, str] | None = None,
     covariate: str = "",
+    defined: Mapping[int, str] | None = None,
+    covariate_names: Sequence[str] = (),
+    background_spec: str | Mapping[str, object] | None = None,
 ) -> Comparison:
     """Restrict every set to the analysed universe and measure them.
 
@@ -408,6 +528,11 @@ def compare(  # noqa: PLR0913
     also tested within strata, and FDR is applied separately to the crude and
     to the adjusted p-values: they answer different questions. The strata must
     be computed within the analysed universe, not the background.
+
+    The covariate guard: a set in ``defined`` (set -> column, see
+    :func:`defined_from`) was cut from the covariate itself, so its pairs get
+    no adjusted result; a set the covariate largely determines
+    (:func:`filled_share`) keeps its adjusted results with a caveat.
 
     Raises:
         ValueError: Fewer than :data:`MIN_SETS` or more than :data:`MAX_SETS`.
@@ -433,8 +558,14 @@ def compare(  # noqa: PLR0913
             grouped.setdefault(strata.get(gene, "none"), set()).add(gene)
         groups = {name: frozenset(members) for name, members in grouped.items()}
 
+    withheld, caveats = (
+        _guard(restricted, groups, covariate=covariate, defined=defined or {})
+        if groups
+        else ({}, {})
+    )
+
     raw: list[dict] = []
-    adjusted_raw: list[tuple[float, float, float, float, int]] = []
+    adjusted_raw: list[tuple[float, float, float, float, int] | None] = []
     for i, j in itertools.combinations(range(len(restricted)), 2):
         a_genes, b_genes = restricted[i].genes, restricted[j].genes
         n_a, n_b = len(a_genes), len(b_genes)
@@ -460,15 +591,29 @@ def compare(  # noqa: PLR0913
                     overlap / min(n_a, n_b) if min(n_a, n_b) else float("nan")
                 ),
                 "construction": reasons.get((i, j), ""),
+                "adjusted_note": (
+                    withheld.get(i)
+                    or withheld.get(j)
+                    or caveats.get(i)
+                    or caveats.get(j)
+                )
+                or "",
             },
         )
         if groups:
-            adjusted_raw.append(_adjusted(a_genes, b_genes, groups))
+            adjusted_raw.append(
+                None
+                if i in withheld or j in withheld
+                else _adjusted(a_genes, b_genes, groups)
+            )
     fdrs = benjamini_hochberg([r["p_value"] for r in raw])
-    adjusted_fdrs = benjamini_hochberg([r[3] for r in adjusted_raw])
+    # FDR over the pairs that have an adjusted result: a withheld pair is not
+    # a test that was run.
+    computed = [r for r in adjusted_raw if r is not None]
+    computed_fdrs = iter(benjamini_hochberg([r[3] for r in computed]))
     adjusted = [
-        AdjustedStat(est, lo, hi, p, fdr, used)
-        for (est, lo, hi, p, used), fdr in zip(adjusted_raw, adjusted_fdrs, strict=True)
+        None if r is None else AdjustedStat(*r[:4], next(computed_fdrs), r[4])
+        for r in adjusted_raw
     ]
     pairs = tuple(
         PairStat(**r, fdr=fdr, adjusted=adjusted[k] if adjusted else None)
@@ -487,6 +632,13 @@ def compare(  # noqa: PLR0913
         outside_background=tuple(len(s.genes - background_genes) for s in sets),
         not_measured=tuple(len((s.genes & background_genes) - universe) for s in sets),
         restricted_by=restricted_by,
+        adjustment_notes=tuple(
+            f"{note}." for _, note in sorted({**caveats, **withheld}.items())
+        ),
+        covariate_names=(tuple(covariate_names) or ((covariate,) if covariate else ()))
+        if groups
+        else (),
+        background_spec=background_spec,
     )
 
 

@@ -12,6 +12,7 @@ from genetrek_server.backgrounds import (
     Background,
     Covariate,
     load_backgrounds,
+    load_combinations,
     load_covariates,
 )
 from genetrek_server.content import CONTENT_PAGES
@@ -85,6 +86,11 @@ class AppConfig:
     #: Properties a comparison can be stratified by (``backgrounds.yaml``
     #: ``covariates``). Empty without the file: comparisons are then crude only.
     covariates: list[Covariate] = field(default_factory=list, repr=False)
+    #: Covariate pairs the Compare view offers for a joint adjustment
+    #: (``backgrounds.yaml`` ``combinations``), as covariate names.
+    covariate_combinations: list[tuple[str, ...]] = field(
+        default_factory=list, repr=False
+    )
 
 
 def _load_yaml(path: Path) -> Any:  # noqa: ANN401
@@ -123,14 +129,24 @@ def _require_file(path: Path) -> None:
 def _backgrounds(
     root: Path,
     columns: list[str],
-) -> tuple[list[Background], list[Covariate]]:
-    """The comparison universes and covariates, dropping bad entries with a warning."""
+    roles: Roles,
+) -> tuple[list[Background], list[Covariate], list[tuple[str, ...]]]:
+    """The comparison universes, covariates and covariate pairs, dropping bad
+    entries with a warning."""
     path = paths.backgrounds_path(root)
     backgrounds, problems = load_backgrounds(path, columns)
-    covariates, covariate_problems = load_covariates(path, columns)
-    for problem in [*problems, *covariate_problems]:
+    covariates, covariate_problems = load_covariates(
+        path, columns, assembly_spans(roles)
+    )
+    combinations, combination_problems = load_combinations(path, covariates)
+    for problem in [*problems, *covariate_problems, *combination_problems]:
         print(f"Warning: backgrounds.yaml: {problem}")  # noqa: T201
-    return backgrounds, covariates
+    return backgrounds, covariates, combinations
+
+
+def assembly_spans(roles: Roles) -> dict[str, tuple[str, str]]:
+    """Each assembly's (start, end) columns, for a gene-length covariate."""
+    return {name: (loc.start, loc.end) for name, loc in roles.assemblies.items()}
 
 
 def load_config(resources_dir: Path | None = None) -> AppConfig:
@@ -252,7 +268,7 @@ def load_config(resources_dir: Path | None = None) -> AppConfig:
         col for col in common_columns if df.schema.get(col) == pl.Boolean
     ]
 
-    backgrounds, covariates = _backgrounds(root, df.columns)
+    backgrounds, covariates, combinations = _backgrounds(root, df.columns, roles)
 
     return AppConfig(
         df=df,
@@ -284,4 +300,5 @@ def load_config(resources_dir: Path | None = None) -> AppConfig:
         ),
         backgrounds=backgrounds,
         covariates=covariates,
+        covariate_combinations=combinations,
     )

@@ -121,6 +121,18 @@ server imports it, never the reverse -- the client must install without FastAPI 
   `config/backgrounds.yaml`; the first is the default, an entry with no `column` is every
   gene). Before it existed the drawer's label said "protein-coding" while the test
   counted all 45,083 rows. The YAML names the column, so no identifier literal enters code.
+  A background is a preset (`backgrounds.yaml`; `where:` ANDs conditions, as the
+  brain-expressed preset does), a database gene list (its True rows), or a visitor's genes
+  (a My list, the current results, or `genes`/`lists_file`/`share` in the API) -- at least
+  `MIN_USER_BACKGROUND` (200) genes, never cached, replayed from `request.json` as genes.
+- **Covariates are columns or spans, one or two at once.** `Covariate.expr()` is the column
+  or, with `span: <assembly>`, the gene length from that assembly's coordinate roles (no
+  stored column). A declared `combinations` pair is crossed with `joint_bins` each
+  (`compare.joint_strata`). **The covariate guard** (`compare.defined_from` +
+  `filled_share`): a set whose `derived_from` lineage reaches a covariate column gets no
+  adjusted result (`adjusted_unavailable`); a set with >= `DETERMINED_SHARE` of its genes
+  in strata it fills keeps it with a caveat. A new threshold flag must therefore record its
+  parent (`genetrek-db set --derived-from`).
 - **Null is "not measured", never "no".** A boolean or numeric column computed from a
   measurement is null outside the genes its source measured. The `universe` metadata key
   says which genes those are; the count is the non-null rows and is never stored.

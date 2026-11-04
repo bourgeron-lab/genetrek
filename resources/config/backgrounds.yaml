@@ -1,15 +1,26 @@
 # Universes for gene-set comparisons (the Compare view and the statistics
 # drawer's enrichment). The first entry is the default. An entry without a
-# `column` is every gene in the database.
+# condition is every gene; `where` lists conditions a gene must all meet.
 #
 # The choice matters: most gene lists are protein-coding, and testing their
 # overlap against all genes -- a third of which are pseudogenes -- makes any
 # two of them look enriched in each other.
+#
+# These are presets. A comparison can also run within any database gene list,
+# or within genes the visitor supplies (a My list, the current results).
 backgrounds:
   - name: Protein-coding genes
     column: hgnc_locus_group
     equals: protein-coding gene
     description: HGNC locus group "protein-coding gene"
+  - name: Brain-expressed protein-coding genes
+    where:
+      - {column: hgnc_locus_group, equals: protein-coding gene}
+      - {column: gtex_v11_brain_expressed, equals: true}
+    description: >-
+      Protein-coding genes with a median TPM of at least 1 in one of the 10 GTEx
+      v11 brain regions. For brain questions: a brain gene list tested against
+      every protein-coding gene is partly enriched for being expressed at all.
   - name: All genes
     description: Every gene in the database, coding or not
 
@@ -17,8 +28,30 @@ backgrounds:
 # analysis across quantile bins, computed within the chosen background, plus a
 # stratum for genes with no value). NDD lists are dominated by constrained
 # genes, so without this almost any brain-related list looks enriched in them.
+# The first is the default. `span: <assembly>` is the gene's length from that
+# assembly's coordinates; `joint_bins` is used when crossed with another.
 covariates:
   - name: LOEUF decile
     column: loeuf
     bins: 10
     description: gnomAD loss-of-function observed/expected upper bound fraction
+  - name: sHet decile
+    column: shet_mean
+    bins: 10
+    description: >-
+      GeneBayes selection coefficient against heterozygous loss of function. An
+      alternative to LOEUF (rank correlation -0.78), not a complement.
+  - name: Gene length decile
+    span: GRCh38
+    bins: 10
+    description: >-
+      Genomic span (end - start) in GRCh38. Long genes collect more de novo
+      variants, so lists from burden analyses lean towards them: autism genes
+      span a median 101 kb, protein-coding genes 29 kb.
+
+# Covariate pairs offered for a joint adjustment (each in `joint_bins`, 5 by
+# default: 25 strata plus "none"). A constraint score with gene length:
+# LOEUF with sHet would adjust twice for the same thing.
+combinations:
+  - [LOEUF decile, Gene length decile]
+  - [sHet decile, Gene length decile]

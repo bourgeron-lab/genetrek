@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 #: The API's version. A minor bump adds endpoints, fields or codes and breaks
 #: no caller; a major bump would break one. Reported by ``/api/health`` and on
 #: every ``/api`` response as :data:`VERSION_HEADER`.
-API_VERSION = "1.1"
+API_VERSION = "1.2"
 VERSION_HEADER = "X-GeneTrek-API-Version"
 
 #: Every code an ``/api`` error can carry. ``api-reference.md`` documents each
@@ -46,6 +46,7 @@ ERROR_CODES: dict[str, str] = {
     "unknown_format": "The download format is not offered.",
     "unknown_genome": "The genome assembly is not one this database carries.",
     "unknown_background": "No comparison background has this name.",
+    "invalid_background": "A supplied background cannot be used (too small, or unreadable).",
     "unknown_covariate": "No covariate has this name.",
     "invalid_set": "A comparison set cannot be read (see detail).",
     "invalid_request": "The request body or parameters are malformed.",

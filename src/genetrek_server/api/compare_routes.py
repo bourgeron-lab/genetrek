@@ -22,6 +22,12 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from genetrek_server.api.errors import ApiError
+from genetrek_server.backgrounds import (
+    MIN_USER_BACKGROUND,
+    background_warning,
+    gene_list_background,
+    user_background,
+)
 from genetrek_server.models.schemas import (
     AdjustedPairResult,
     BackgroundInfo,
@@ -60,6 +66,11 @@ def _number(value: float) -> float | None:
     return None if value != value or value in (float("inf"), float("-inf")) else value  # noqa: PLR0124
 
 
+def _place(index: int) -> str:
+    """How an error names the entry it is about: a set, or the background."""
+    return "background" if index < 0 else f"set {index + 1}"
+
+
 def register_compare_routes(
     router: APIRouter,
     config: AppConfig,
@@ -77,6 +88,8 @@ def register_compare_routes(
     database_keys = cmp.keys_where(config.df[key]) if key is not None else frozenset()
 
     def _universe(background: Background) -> frozenset[str]:
+        if background.genes is not None:
+            return background.genes
         if background.name not in universes and key is not None:
             universes[background.name] = cmp.keys_where(
                 config.df.filter(background.expr())[key],
@@ -92,26 +105,39 @@ def register_compare_routes(
 
     def _strata(
         background: Background,
-        covariate: Covariate,
+        covariates: list[Covariate],
         sets: list[cmp.GeneSet],
     ) -> dict[str, str]:
+        """Gene -> stratum, crossing the covariates, within the analysed universe."""
         partial = tuple(
             sorted(s.column for s in sets if s.measured is not None and s.column)
         )
-        cache_key = (background.name, covariate.name, partial)
-        if cache_key not in strata_cache and key is not None:
-            analysed = cmp.effective_universe(sets, _universe(background))
-            strata_cache[cache_key] = cmp.strata_for(
-                config.df.filter(pl.col(key).cast(pl.String).is_in(list(analysed))),
-                key,
-                covariate.column,
-                covariate.bins,
-            )
-        return strata_cache[cache_key]
+        names = "|".join(c.name for c in covariates)
+        cache_key = (background.name, names, partial)
+        # A supplied background is a visitor's genes: computed, never kept.
+        cached = background.kind == "preset"
+        if cached and cache_key in strata_cache:
+            return strata_cache[cache_key]
+        assert key is not None  # noqa: S101 -- checked by the caller
+        analysed = cmp.effective_universe(sets, _universe(background))
+        frame = config.df.filter(pl.col(key).cast(pl.String).is_in(list(analysed)))
+        crossed = len(covariates) > 1
+        strata = cmp.joint_strata(
+            [
+                cmp.strata_for(
+                    frame, key, c.expr(), c.joint_bins if crossed else c.bins
+                )
+                for c in covariates
+            ],
+        )
+        if cached:
+            strata_cache[cache_key] = strata
+        return strata
 
     def _background_info(background: Background) -> BackgroundInfo:
         return BackgroundInfo(
             name=background.name,
+            kind=background.kind,
             definition=background.describe(),
             description=background.description,
             size=len(_universe(background)),
@@ -126,12 +152,15 @@ def register_compare_routes(
                 CovariateInfo(
                     name=c.name,
                     column=c.column,
+                    span=c.span,
                     bins=c.bins,
+                    joint_bins=c.joint_bins,
                     description=c.description,
                     definition=c.describe(),
                 )
                 for c in config.covariates
             ],
+            combinations=[list(c) for c in config.covariate_combinations],
         )
 
     def _from_field(
@@ -145,12 +174,12 @@ def register_compare_routes(
                 config.field_aliases,
             )
         except lookup.FieldNotFoundError as exc:
-            raise ApiError(422, "unknown_field", f"set {index + 1}: {exc}") from exc
+            raise ApiError(422, "unknown_field", f"{_place(index)}: {exc}") from exc
         if column not in config.all_boolean_columns:
             raise ApiError(
                 422,
                 "not_a_gene_list",
-                f"set {index + 1}: {column!r} is not a gene list (a Boolean column)",
+                f"{_place(index)}: {column!r} is not a gene list (a Boolean column)",
             )
         assert key is not None  # noqa: S101 -- checked by the caller
         # A filter keeps only True rows: null ("not measured") is not membership,
@@ -194,11 +223,11 @@ def register_compare_routes(
             )
         values = [v.strip() for v in spec.genes or [] if v and v.strip()]
         if not values:
-            raise ApiError(422, "invalid_set", f"set {index + 1}: no genes given")
+            raise ApiError(422, "invalid_set", f"{_place(index)}: no genes given")
         try:
             report = gene_index.resolve(values, spec.id_type)
         except (ValueError, LookupError) as exc:
-            raise ApiError(422, "invalid_set", f"set {index + 1}: {exc}") from exc
+            raise ApiError(422, "invalid_set", f"{_place(index)}: {exc}") from exc
         genes = cmp.keys_where(report.resolved()[report.key])
         label = spec.label or f"Set {index + 1}"
         gene_set = cmp.GeneSet(f"genes:{index}", label, label, "my_list", genes)
@@ -234,13 +263,13 @@ def register_compare_routes(
                 )
                 source = "lists_file"
         except ul.UserListError as exc:
-            raise ApiError(422, "invalid_set", f"set {index + 1}: {exc}") from exc
+            raise ApiError(422, "invalid_set", f"{_place(index)}: {exc}") from exc
         if list_key != key:
             raise ApiError(
                 422,
                 "invalid_set",
                 (
-                    f"set {index + 1}: the link was made for a database keyed on "
+                    f"{_place(index)}: the link was made for a database keyed on "
                     f"{list_key!r}, not {key!r}"
                 ),
             )
@@ -249,7 +278,7 @@ def register_compare_routes(
                 422,
                 "invalid_set",
                 (
-                    f"set {index + 1}: list_index {spec.list_index}, but it holds "
+                    f"{_place(index)}: list_index {spec.list_index}, but it holds "
                     f"{len(lists)} list(s)"
                 ),
             )
@@ -275,6 +304,60 @@ def register_compare_routes(
             n_not_in_database=missing,
         )
 
+    def _background(
+        spec: str | CompareSet | None,
+    ) -> tuple[Background, str | dict[str, object]]:
+        """The universe a request asks for, and how to ask for it again.
+
+        A preset by name, or -- built exactly as a set is -- a database gene
+        list or a visitor's genes. Supplied genes are replayed as their keys,
+        like a supplied set, since nothing here is kept.
+        """
+        if spec is None or isinstance(spec, str):
+            presets = {b.name: b for b in config.backgrounds}
+            name = spec or config.backgrounds[0].name
+            if name not in presets:
+                raise ApiError(
+                    422,
+                    "unknown_background",
+                    f"unknown background {name!r}; available: {list(presets)}",
+                )
+            return presets[name], name
+        try:
+            if spec.field is not None:
+                gene_set, _ = _from_field(spec, -1)
+            elif spec.genes is not None:
+                gene_set, _ = _from_genes(spec, -1)
+            else:
+                gene_set, _ = _from_list(spec, -1)
+        except ApiError as exc:
+            if exc.code in {"unknown_field", "unavailable"}:
+                raise
+            raise ApiError(422, "invalid_background", str(exc.detail)) from exc
+        genes = gene_set.genes & database_keys
+        try:
+            if gene_set.column is not None:
+                if len(genes) < MIN_USER_BACKGROUND:
+                    msg = (
+                        f"a background needs at least {MIN_USER_BACKGROUND} genes; "
+                        f"{gene_set.label!r} has {len(genes)}"
+                    )
+                    raise ValueError(msg)  # noqa: TRY301 -- one message for both kinds
+                return (
+                    gene_list_background(gene_set.name, genes),
+                    {"field": gene_set.column},
+                )
+            # Pasted genes have no name of their own; a My list does.
+            label = spec.label or (
+                "Supplied list" if spec.genes is not None else gene_set.name
+            )
+            return (
+                user_background(label, genes),
+                {"label": label, "genes": sorted(genes)},
+            )
+        except ValueError as exc:
+            raise ApiError(422, "invalid_background", str(exc)) from exc
+
     @router.post("/compare", response_model=CompareResponse)
     def compare(body: CompareRequest) -> CompareResponse:
         """Compare 2 to 12 gene sets: the Compare view's statistics, over HTTP."""
@@ -284,15 +367,7 @@ def register_compare_routes(
                 "unavailable",
                 "this database has no primary key; sets cannot be compared",
             )
-        backgrounds = {b.name: b for b in config.backgrounds}
-        name = body.background or config.backgrounds[0].name
-        if name not in backgrounds:
-            raise ApiError(
-                422,
-                "unknown_background",
-                f"unknown background {name!r}; available: {list(backgrounds)}",
-            )
-        background = backgrounds[name]
+        background, background_spec = _background(body.background)
         covariates = {c.name: c for c in config.covariates}
         wanted = (
             list(covariates)[:1] if body.adjust_for is None else list(body.adjust_for)
@@ -303,7 +378,10 @@ def register_compare_routes(
                 "unknown_covariate",
                 f"unknown covariate(s) {unknown}; available: {list(covariates)}",
             )
-        covariate = covariates[wanted[0]] if wanted else None
+        if len(set(wanted)) != len(wanted):
+            raise ApiError(422, "invalid_request", "adjust_for names a covariate twice")
+        chosen = [covariates[w] for w in wanted]
+        covariate_label = " + ".join(c.name for c in chosen)
 
         built = []
         for index, spec in enumerate(body.sets):
@@ -325,8 +403,13 @@ def register_compare_routes(
             construction=cmp.construction_reasons(
                 sets, config.fields, config.field_aliases
             ),
-            strata=_strata(background, covariate, sets) if covariate else None,
-            covariate=covariate.name if covariate else "",
+            strata=_strata(background, chosen, sets) if chosen else None,
+            covariate=covariate_label,
+            defined=cmp.defined_from(
+                sets, config.fields, [c.column for c in chosen if c.column]
+            ),
+            covariate_names=[c.name for c in chosen],
+            background_spec=background_spec,
         )
 
         set_results = [
@@ -371,9 +454,15 @@ def register_compare_routes(
                         p_value=_number(p.adjusted.p_value),
                         fdr=_number(p.adjusted.fdr),
                         strata_used=p.adjusted.strata,
+                        caveat=p.adjusted_note,
                     )
                     if p.adjusted is not None
                     else None
+                ),
+                adjusted_unavailable=(
+                    p.adjusted_note
+                    if p.adjusted is None and comparison.covariate
+                    else ""
                 ),
             )
             for p in comparison.pairs
@@ -395,9 +484,15 @@ def register_compare_routes(
                     "restricted_by": list(comparison.restricted_by),
                 },
             ),
-            warnings=(
-                [comparison.coverage_warning] if comparison.coverage_warning else []
-            ),
+            warnings=[
+                w
+                for w in (
+                    background_warning(background),
+                    comparison.coverage_warning,
+                    *comparison.adjustment_notes,
+                )
+                if w
+            ],
             adjusted_for=[comparison.covariate] if comparison.covariate else [],
             sets=set_results,
             pairs=pairs,
@@ -407,6 +502,9 @@ def register_compare_routes(
                 release=config.release,
                 background_definition=background.describe(),
                 today=date.today(),  # noqa: DTZ011
-                covariate_definition=covariate.describe() if covariate else "",
+                covariate_definition="; ".join(
+                    c.describe(bins=c.joint_bins if len(chosen) > 1 else c.bins)
+                    for c in chosen
+                ),
             ),
         )
