@@ -57,6 +57,11 @@ _PRESET = "preset:"
 _PREVIEW = 40
 #: Stands in for an infinite odds ratio, which JSON cannot carry.
 _INFINITE = 1e300
+#: The figure card's narrowest width beside the Region card. Below it the
+#: Region card wraps under the figure: kept beside it, it once left the figure
+#: 41 px of a 1024 px window with the search drawer open.
+_FIGURE_MIN_PX = 440
+_REGION_PX = 340
 
 _FORMATS = {
     "SVG (vector)": ("svg", None),
@@ -558,10 +563,16 @@ class CompareView:
         elif n == cmp.MIN_SETS:
             self.main_kind = "venn"
 
-        with ui.row().classes("w-full gap-3 items-stretch no-wrap"):
-            with ui.card().classes("flex-grow").style("min-width: 0;"):
+        # Side by side, the figure's grow factor of 9999 against the card's 1
+        # gives it all the free width and the card stays 340 px. Wrapped, the
+        # card is alone on its line and grows to the full width.
+        with ui.row().classes("w-full gap-3 items-stretch"):
+            with ui.card().style(f"flex: 9999 1 {_FIGURE_MIN_PX}px; min-width: 0;"):
                 self._render_main()
-            with ui.card().style("width: 340px; flex: none;"):
+            self.region_card = ui.card().style(
+                f"flex: 1 1 {_REGION_PX}px; min-width: 0; scroll-margin-top: 80px;",
+            )
+            with self.region_card:
                 self._render_region()
 
         if n >= 3:  # noqa: PLR2004
@@ -828,6 +839,20 @@ class CompareView:
             return
         self.region = (members, True)
         self._render_region.refresh()
+        self._reveal_region()
+
+    def _reveal_region(self) -> None:
+        """Scroll the Region card into view when its title is below the fold.
+
+        At narrow widths the card sits under the figure, so a click on the
+        Venn or the UpSet would otherwise change it out of sight.
+        """
+        ui.run_javascript(
+            "(() => { const el = document.getElementById("
+            f"{json.dumps(self.region_card.html_id)}); "
+            "if (el && el.getBoundingClientRect().top > window.innerHeight - 120) "
+            "el.scrollIntoView({behavior: 'smooth', block: 'start'}); })();",
+        )
 
     def _select_pair(self, text: str) -> None:
         try:
