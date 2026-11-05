@@ -452,3 +452,22 @@ def test_no_ui_handler_binds_its_first_parameter_by_default():
         if re.search(r"lambda [a-z_]+=", line)
     ]
     assert not offenders
+
+
+def test_no_ui_code_builds_a_dom_id_by_hand():
+    """NiceGUI 4 renders element 12 as ``id="ng-12"``, where 3.x wrote ``c12``.
+
+    Four ids built as ``f"c{el.id}"`` pointed at nothing after the upgrade, and
+    no test failed: the drawer toggles and the token editor's link to the hidden
+    textarea went dead in the browser. ``el.html_id`` (Python) and
+    ``getHtmlElement(id)`` (JavaScript) follow whatever scheme NiceGUI uses.
+    """
+    root = Path(ul.__file__).parent.parent / "ui"
+    offenders = [
+        f"{path.name}:{lineno}"
+        for path in root.rglob("*")
+        if path.suffix in {".py", ".js"} and "vendor" not in path.parts
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        if re.search(r"""f["']c\{|["']c["']\s*\+""", line)
+    ]
+    assert not offenders

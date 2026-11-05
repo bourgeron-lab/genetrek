@@ -238,7 +238,7 @@ def create_column_selector(
         "None" empties the tree but not the table: `apply_selection` puts the
         locked column back, so the table keeps its row labels.
         """
-        search.set_value(None)
+        search.set_value("")
         if value:
             # Never bare `tick()`: with no argument it ticks *every* node id,
             # parents included, and those then sit in the prop for good.

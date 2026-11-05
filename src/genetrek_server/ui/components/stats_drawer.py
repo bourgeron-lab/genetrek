@@ -248,7 +248,7 @@ def create_stats_drawer(
     hidden_stats_toggle_btn = ui.button("", on_click=stats_drawer.toggle).style(
         "display: none;",
     )
-    hidden_stats_btn_id = f"c{hidden_stats_toggle_btn.id}"
+    hidden_stats_btn_id = hidden_stats_toggle_btn.html_id
 
     ui.add_body_html(f"""
         <div id="stats-panel-toggle" class="drawer-toggle-fixed-right" onclick="document.getElementById('{hidden_stats_btn_id}').click();">
