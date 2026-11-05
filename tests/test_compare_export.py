@@ -193,6 +193,31 @@ class TestFigureSizing:
         assert figure.layout.height > 0
         assert figure.layout.font.family.startswith("Arial")
 
+    @pytest.mark.parametrize("build", ["venn", "upset", "heatmap"])
+    @pytest.mark.parametrize("width_mm", [None, 89])
+    def test_square_axes_shrink_the_plot_not_the_range(
+        self, comparison, build, width_mm
+    ):
+        """Plotly's default keeps an aspect by widening a range and writes the
+        result back into the layout, so every resize starts from the last one:
+        a Venn first drawn 41 px wide still drew 19 px circles at 1440 px."""
+        style = figures.SCREEN if width_mm is None else figures.export_style(width_mm)
+        figure = {
+            "venn": figures.venn_figure,
+            "upset": figures.upset_figure,
+            "heatmap": figures.heatmap_figure,
+        }[build](comparison, style=style)
+        layout = figure.to_plotly_json()["layout"]
+        tied = {
+            name
+            for key, axis in layout.items()
+            if key.startswith(("xaxis", "yaxis")) and axis.get("scaleanchor")
+            for name in (key, _axis_key(axis["scaleanchor"]))
+        }
+        assert build == "upset" or tied
+        for name in tied:
+            assert layout[name].get("constrain") == "domain", name
+
     def test_screen_venn_regions_are_clickable(self, comparison):
         figure = figures.venn_figure(comparison)
         clicks = [t for t in figure.data if t.customdata is not None]
@@ -213,6 +238,11 @@ class TestFigureSizing:
             figure.data[0].z[0][1],
             comparison.pairs[0].jaccard,
         )
+
+
+def _axis_key(anchor: str) -> str:
+    """The layout key of a trace-side axis id: ``"x"`` -> ``"xaxis"``."""
+    return f"{anchor[0]}axis{anchor[1:]}"
 
 
 def test_an_underflowed_fdr_is_shown_as_a_bound():

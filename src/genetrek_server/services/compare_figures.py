@@ -177,6 +177,15 @@ def _hidden_axis() -> dict:
     return {"visible": False, "showgrid": False, "zeroline": False}
 
 
+#: For both axes of a figure whose y axis is ``scaleanchor``-ed to x: keep the
+#: aspect by shrinking the plot area, not by widening an axis range. With
+#: Plotly's default (``constrain: "range"``) the widened range is written back
+#: into the layout, so every resize starts from the last one's: a Venn first
+#: drawn 41 px wide kept that range at 1440 px and drew 19 px circles in a
+#: 457 px plot. A domain is recomputed from the layout's on every resize.
+_KEEP_RANGE = {"constrain": "domain"}
+
+
 def _fmt(n: int) -> str:
     return f"{n:,}"
 
@@ -345,8 +354,13 @@ def venn_figure(comparison: Comparison, style: FigureStyle = SCREEN) -> go.Figur
         fig_layout["height"] += legend_px + top_px
     fig_layout.update(
         {
-            "xaxis": {**_hidden_axis(), "range": list(xr)},
-            "yaxis": {**_hidden_axis(), "range": list(yr), "scaleanchor": "x"},
+            "xaxis": {**_hidden_axis(), **_KEEP_RANGE, "range": list(xr)},
+            "yaxis": {
+                **_hidden_axis(),
+                **_KEEP_RANGE,
+                "range": list(yr),
+                "scaleanchor": "x",
+            },
             "shapes": shapes,
             "annotations": annotations,
             "showlegend": True,
@@ -644,8 +658,21 @@ def heatmap_figure(
     layout = _layout(style, aspect=0.82, margin={"l": 8, "r": right, "t": 8, "b": 8})
     layout.update(
         {
-            "xaxis": {"side": "bottom", "tickangle": -40, "showgrid": False},
-            "yaxis": {"autorange": "reversed", "showgrid": False, "scaleanchor": "x"},
+            # Autoranged, so a resize recomputes the range either way; keeping
+            # it keeps the row names beside the cells instead of at the edge
+            # of a wide card.
+            "xaxis": {
+                **_KEEP_RANGE,
+                "side": "bottom",
+                "tickangle": -40,
+                "showgrid": False,
+            },
+            "yaxis": {
+                **_KEEP_RANGE,
+                "autorange": "reversed",
+                "showgrid": False,
+                "scaleanchor": "x",
+            },
         },
     )
     if flagged:
