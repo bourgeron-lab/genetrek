@@ -218,7 +218,7 @@ def create_search_drawer(
                 on_click=perform_search,
             ).style("background-color: #38ada9;")
 
-            create_search_trigger(f"c{search_btn.id}")
+            create_search_trigger(search_btn.html_id)
 
             ui.button("Clear", icon="clear", on_click=clear_search).props(
                 "outline",
@@ -228,7 +228,7 @@ def create_search_drawer(
 
     # Left drawer toggle
     hidden_toggle_btn = ui.button("", on_click=drawer.toggle).style("display: none;")
-    hidden_btn_id = f"c{hidden_toggle_btn.id}"
+    hidden_btn_id = hidden_toggle_btn.html_id
 
     ui.add_body_html(f"""
         <div id="search-panel-toggle" class="drawer-toggle-fixed" onclick="document.getElementById('{hidden_btn_id}').click();">

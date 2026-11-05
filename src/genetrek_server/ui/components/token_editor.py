@@ -18,7 +18,7 @@ def create_token_editor(
         .props("outlined bg-color=white")
         .style("display: none;")
     )
-    search_input_id = f"c{search_input.id}"
+    search_input_id = search_input.html_id
 
     ui.html(
         '<div id="token-editor-box" class="token-editor-container" '

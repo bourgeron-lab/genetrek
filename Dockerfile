@@ -69,6 +69,14 @@ ENV PYTHONUNBUFFERED=1 \
     GENETREK_RESOURCES=/app/resources \
     HOME=/tmp
 
+# Debian security fixes published since the base image was built. Docker
+# rebuilds the official image on its own schedule, so a fix that is only in
+# bookworm-security (apt 2.6.2, flagged by an image scan in November 2026) is
+# not in a freshly pulled base until then.
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system --gid 1000 app \
  && useradd --system --uid 1000 --gid 1000 --no-create-home \
             --shell /usr/sbin/nologin app
