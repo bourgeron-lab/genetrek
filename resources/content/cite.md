@@ -63,7 +63,7 @@ and p-values:
 > [doi:10.1038/s41588-023-01451-6](https://doi.org/10.1038/s41588-023-01451-6)
 
 **Loss-of-function constraint** — LOEUF, MOEUF and the gnomAD constraint flags
-are from the [gnomAD](https://gnomad.broadinstitute.org/) v4.1.1 constraint
+are from the [gnomAD](https://gnomad.broadinstitute.org/) v4.1.2 constraint
 metrics; cite gnomAD's own current citation guidance.
 
 **Nomenclature and coordinates** — gene symbols, identifiers and cross-references
