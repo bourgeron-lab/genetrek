@@ -7,10 +7,11 @@ from typing import TYPE_CHECKING, Any
 
 from nicegui import ui
 
+from genetrek_server.schema import badge_key, is_scale_config
 from genetrek_server.services.enrichment import compute_enrichment
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable, Mapping
 
     from nicegui.events import ValueChangeEventArguments
 
@@ -217,6 +218,12 @@ def create_stats_drawer(
                     scatter_plot_container,
                     state["filtered_df"],
                     config.roles.symbol,
+                    loeuf_threshold(
+                        config.badges_config,
+                        loeuf_meta.aliases
+                        if (loeuf_meta := config.fields.get("loeuf"))
+                        else (),
+                    ),
                 )
 
             scatter_plot = _DeferredPlot(update_scatter_plot)
@@ -394,10 +401,34 @@ def _rounded(values: list[Any], digits: int = _COORDINATE_DIGITS) -> list[Any]:
     return [None if v is None else round(v, digits) for v in values]
 
 
+def loeuf_threshold(
+    badges_config: Mapping[str, Any],
+    aliases: Iterable[str] = (),
+) -> float | None:
+    """The LOEUF cut-off the constraint plot draws, or None to draw none.
+
+    Read from the ``loeuf`` colour scale in ``badges.yaml`` -- its first
+    ``below`` bound, the value the table colours red under -- so the plot's
+    line, the table's colours and ``is_loeuf_gnomad_v4_1_1`` restate one
+    number. The line used to be a literal 0.35, gnomAD v2's cut-off, still
+    drawn after the data moved to v4, whose cut-off is 0.45. The scale is
+    found the way the table finds it (:func:`schema.badge_key`), so one keyed
+    by an alias still counts.
+    """
+    entry = badges_config.get(badge_key("loeuf", aliases, badges_config))
+    if entry is None or not is_scale_config(entry):
+        return None
+    return next(
+        (float(rule["below"]) for rule in entry["scale"] if "below" in rule),
+        None,
+    )
+
+
 def _render_scatter_plot(
     container: ui.column,
     filtered_df: Any,  # noqa: ANN401
     symbol_col: str | None,
+    threshold: float | None,
 ) -> None:
     """Render the constraint scatter plot: selection coefficient against LOEUF.
 
@@ -492,14 +523,15 @@ def _render_scatter_plot(
             ),
         )
 
-    fig.add_hline(
-        y=0.35,
-        line_dash="dash",
-        line_color="black",
-        line_width=1,
-        annotation_text="LOEUF = 0.35",
-        annotation_position="right",
-    )
+    if threshold is not None:
+        fig.add_hline(
+            y=threshold,
+            line_dash="dash",
+            line_color="black",
+            line_width=1,
+            annotation_text=f"LOEUF = {threshold:g}",
+            annotation_position="right",
+        )
     loeuf_vals = plot_df["loeuf"].to_list()
     fig.update_layout(
         xaxis_title=x_label,

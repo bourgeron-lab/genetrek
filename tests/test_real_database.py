@@ -20,6 +20,7 @@ from genetrek_server import paths, schema
 from genetrek_server.db.licences import licences_markdown
 from genetrek_server.paths import ResourcesNotFoundError
 from genetrek_server.services.versions import version_families
+from genetrek_server.ui.components.stats_drawer import loeuf_threshold
 
 
 @pytest.fixture(scope="module")
@@ -391,3 +392,18 @@ class TestCovariateGuard:
             background="Brain-expressed protein-coding genes",
         )
         assert 0 < brain["background"]["size"] < coding["background"]["size"]
+
+
+def test_constraint_plot_line_matches_the_loeuf_flag(real_resources, real_fields):
+    """The plot's LOEUF line is the bound the shipped flag is named after.
+
+    It was a literal 0.35 (gnomAD v2) beside an ``is_loeuf_gnomad_v4_1_1``
+    flag at 0.45 (gnomAD v4). Both now have to say the same number.
+    """
+    badges = yaml.safe_load(paths.badges_path(real_resources).read_text())
+    threshold = loeuf_threshold(badges, real_fields["loeuf"].aliases)
+    assert threshold is not None
+    flags = [m for name, m in real_fields.items() if name.startswith("is_loeuf_")]
+    assert flags
+    for meta in flags:
+        assert f"< {threshold:g}" in meta.fullname
