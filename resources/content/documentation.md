@@ -290,9 +290,10 @@ supporting evidence are detailed.
 ### Constraint metrics
 
 The loss-of-function metrics are taken from their sources rather than
-recomputed: LOEUF, MOEUF and the gnomAD constraint flags from gnomAD v4.1.1, and
-the selection coefficient s-het from Sun et al. 2024. The constrained calls are
-the published calls, not thresholds applied here, which is why the constraint
+recomputed: LOEUF, MOEUF and the gnomAD constraint flags from gnomAD v4.1.2 (the
+MANE Select transcript, else the canonical one), and the selection coefficient
+s-het from Sun et al. 2024. The LOEUF flag is gnomAD's recommended cut-off,
+LOEUF < 0.45, and the s-het call is the published one, which is why the constraint
 plot colours points by the published call instead of splitting them at a cutoff.
 
 ### Autism variants

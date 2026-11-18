@@ -1008,16 +1008,16 @@ is_shet_constrained:
   aliases: []
 loeuf:
   fullname: LOEUF
-  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for loss-of-function variants from gnomAD v4.1.1, based on the Ensembl canonical transcript. Low LOEUF scores indicate strong selection against pLoF variation in a given gene."
-  update: ""
+  description: "Upper bound of the 90% confidence interval on the observed/expected ratio of high-confidence loss-of-function variants (LOEUF), from gnomAD v4.1.2 for the gene's MANE Select transcript, else its canonical one. Low values mean strong selection against loss-of-function variation."
+  update: "20261118"
   visibility: secondary
   priority: 20
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
   id_type: null
   assembly: ""
@@ -1029,16 +1029,16 @@ loeuf:
   aliases: []
 moeuf:
   fullname: MOEUF
-  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for missense variants from gnomAD v4.1.1, based on the Ensembl canonical transcript."
-  update: ""
+  description: "Upper bound of the 90% confidence interval on the observed/expected ratio of missense variants, from gnomAD v4.1.2 for the gene's MANE Select transcript, else its canonical one."
+  update: "20261118"
   visibility: hidden
   priority: null
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
   id_type: null
   assembly: ""
@@ -1050,16 +1050,16 @@ moeuf:
   aliases: []
 soeuf:
   fullname: SOEUF
-  description: "Upper bound of the 90% Poisson CI on the observed/expected ratio for synonymous variants from gnomAD v4.1.1, based on the Ensembl canonical transcript."
-  update: ""
+  description: "Upper bound of the 90% confidence interval on the observed/expected ratio of synonymous variants, from gnomAD v4.1.2 for the gene's MANE Select transcript, else its canonical one."
+  update: "20261118"
   visibility: hidden
   priority: null
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
   id_type: null
   assembly: ""
@@ -1071,16 +1071,16 @@ soeuf:
   aliases: []
 is_loeuf_gnomad_v4_1_1:
   fullname: LOEUF score < 0.45
-  description: "A LOEUF threshold of 0.45 can be used to support the interpretation of Mendelian disease. Genes with a LOEUF < 0.45 fall within the 15th percentile, corresponding to the 15% of genes that are most intolerant to loss-of-function variants. The score is available for 17,063 MANE Select transcripts."
-  update: ""
+  description: "LOEUF < 0.45, the cut-off gnomAD v4 recommends for supporting the interpretation of Mendelian disease: about the 15% of genes most intolerant to loss-of-function variants (0.449 is the 15th percentile of gnomAD's MANE Select LOEUF thresholds). Null where gnomAD v4.1.2 has no LOEUF for the gene. The name keeps v4_1_1: v4.1.2 changed no LOEUF value, only gnomAD's rank and bin fields."
+  update: "20261118"
   visibility: secondary
   priority: 10
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: boolean
   id_type: null
   assembly: ""
@@ -1092,16 +1092,16 @@ is_loeuf_gnomad_v4_1_1:
   aliases: []
 gnomad_gene_flags:
   fullname: gnomAD gene flags
-  description: "gnomAD v4.1.1 gene-level quality flags: low_exome_coverage, low_exome_mapping_quality, or both"
-  update: ""
+  description: "gnomAD v4.1.2 gene-level quality flags: low_exome_coverage, low_exome_mapping_quality, or both"
+  update: "20261118"
   visibility: hidden
   priority: null
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: categorical
   id_type: null
   assembly: ""
@@ -1114,15 +1114,15 @@ gnomad_gene_flags:
 gnomad_constraint_flags:
   fullname: gnomAD constraint flags
   description: "1,348 MANE Select transcripts are flagged in constraint analyses based on: (1) no expected variants, (2) far too many synonymous, missense or pLoF variants, (3) far too few synonymous variants."
-  update: ""
+  update: "20261118"
   visibility: hidden
   priority: null
   category: "Constraint"
   subcategory: "gnomAD"
-  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics"
+  source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
   doi: "10.1038/s41586-020-2308-7"
   licence: CC0-1.0
-  universe: ""
+  universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: categorical
   id_type: null
   assembly: ""
@@ -1135,7 +1135,7 @@ gnomad_constraint_flags:
 constraint:
   fullname: Constrained genes
   description: "A gene is considered constrained if it meets the threshold of at least one of the two constraint scores, s-het or LOEUF: s-het mean > 0.073 and s-het lower bound > 0.021, or LOEUF score < 0.45."
-  update: "20260612"
+  update: "20261118"
   visibility: primary
   priority: 10
   category: "Constraint"

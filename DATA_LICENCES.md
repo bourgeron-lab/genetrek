@@ -94,12 +94,12 @@ Do not edit it by hand.
 | `rummagene_tf` | Rummagene transcription factor | Unclear (CC-BY-4.0 data, CC-BY-NC-SA-4.0 repository) | https://rummagene.com/ - Rummagene | 10.1038/s42003-024-06177-7 |
 | `trrust_v2_tf` | TRRUST transcription factor | CC-BY-SA-4.0 | TRRUST - https://www.grnpedia.org/trrust/ v2 | 10.1093/nar/gkx1013 |
 | `constraint` | Constrained genes | CC-BY-4.0 | combined constraint call |  |
-| `is_loeuf_gnomad_v4_1_1` | LOEUF score < 0.45 | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
-| `loeuf` | LOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
-| `gnomad_constraint_flags` | gnomAD constraint flags | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
-| `gnomad_gene_flags` | gnomAD gene flags | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
-| `moeuf` | MOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
-| `soeuf` | SOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.1 constraint metrics | 10.1038/s41586-020-2308-7 |
+| `is_loeuf_gnomad_v4_1_1` | LOEUF score < 0.45 | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
+| `loeuf` | LOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
+| `gnomad_constraint_flags` | gnomAD constraint flags | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
+| `gnomad_gene_flags` | gnomAD gene flags | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
+| `moeuf` | MOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
+| `soeuf` | SOEUF | CC0-1.0 | https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID | 10.1038/s41586-020-2308-7 |
 | `is_shet_constrained` | s-het constrained | CC-BY-4.0 | Sun et al. Nature 2024 | 10.1038/s41586-024-07556-0 |
 | `shet_mean` | s-het mean | CC-BY-4.0 | Sun et al. Nature 2024 | 10.1038/s41586-024-07556-0 |
 | `shet_lower` | s-het (lower bound) | CC-BY-4.0 | Sun et al. Nature 2024 | 10.1038/s41586-024-07556-0 |
