@@ -1015,7 +1015,7 @@ loeuf:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
@@ -1036,7 +1036,7 @@ moeuf:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
@@ -1057,7 +1057,7 @@ soeuf:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: float
@@ -1078,7 +1078,7 @@ is_loeuf_gnomad_v4_1_1:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: boolean
@@ -1099,7 +1099,7 @@ gnomad_gene_flags:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: categorical
@@ -1120,7 +1120,7 @@ gnomad_constraint_flags:
   category: "Constraint"
   subcategory: "gnomAD"
   source: "https://gnomad.broadinstitute.org/data#v4-constraint - gnomAD v4.1.2 constraint metrics (gnomad.v4.1.2.constraint_metrics.tsv.bgz), MANE Select transcript else canonical; joined on Ensembl gene ID, else NCBI gene ID"
-  doi: "10.1038/s41586-020-2308-7"
+  doi: "10.1038/s41586-023-06045-0"
   licence: CC0-1.0
   universe: "genes with a gnomAD v4.1.2 constraint value for their MANE Select (else canonical) transcript"
   value_type: categorical

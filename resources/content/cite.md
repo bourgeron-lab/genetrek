@@ -64,7 +64,17 @@ and p-values:
 
 **Loss-of-function constraint** — LOEUF, MOEUF and the gnomAD constraint flags
 are from the [gnomAD](https://gnomad.broadinstitute.org/) v4.1.2 constraint
-metrics; cite gnomAD's own current citation guidance.
+metrics. gnomAD v4 has no paper of its own yet; gnomAD asks you to name the
+release and cite its current flagship paper:
+
+> gnomAD (v4.1, 807,162 individuals, released on 04/19/2024) (Chen et al., 2023).
+>
+> Chen S, Francioli LC, Goodrich JK, et al. **A genomic mutational constraint
+> map using variation in 76,156 human genomes.** Nature. 2024;625:92–100.
+> [doi:10.1038/s41586-023-06045-0](https://doi.org/10.1038/s41586-023-06045-0).
+
+The constraint method itself (LOEUF) is described in Karczewski et al., Nature
+2020, [doi:10.1038/s41586-020-2308-7](https://doi.org/10.1038/s41586-020-2308-7).
 
 **Nomenclature and coordinates** — gene symbols, identifiers and cross-references
 are from [HGNC](https://www.genenames.org/); coordinates are from
